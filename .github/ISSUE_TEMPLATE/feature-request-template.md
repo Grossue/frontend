@@ -1,7 +1,7 @@
 ---
 name: Feature Request Template
 about: 기능 추가 이슈 템플릿
-title: ''
+title: 'Feat: '
 labels: ''
 assignees: ''
 
