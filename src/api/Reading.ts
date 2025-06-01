@@ -10,10 +10,10 @@ export const getArticleGeneral = async (
       url: `/v1/article/general?topic=${topic}&level=${level}&forTest=${forTest}`,
       params: {},
     });
-    console.log("일반 글 생성 성공", res);
+    console.log("일반 기사 생성 성공", res);
     return res;
   } catch (error) {
-    console.error("일반 글 생성 오류:", error);
+    console.error("일반 기사 생성 오류:", error);
     throw error;
   }
 };
@@ -28,10 +28,10 @@ export const getArticleScript = async (
       url: `/v1/article/script?topic=${topic}&level=${level}&forTest=${forTest}`,
       params: {},
     });
-    console.log("일반 글 생성 성공", res);
+    console.log("대본 형식 기사 생성 성공", res);
     return res;
   } catch (error) {
-    console.error("일반 글 생성 오류:", error);
+    console.error("대본 형식 기사 생성 오류:", error);
     throw error;
   }
 };

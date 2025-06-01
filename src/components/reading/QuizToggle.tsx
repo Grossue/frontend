@@ -21,14 +21,15 @@ const Tab = styled.button<{ isActive: boolean }>`
   position: fixed;
   width: 70px;
   height: 38px;
-  top: 160px;
+  top: 100px;
   right: ${({ isActive }) => (isActive ? "400px" : "0")};
-  transform: translateY(-50%);
-
-  background: ${({ theme }) => theme.color.primary70};
-  color: white;
+  transition: right 0.3s ease;
+  background: ${({ theme, isActive }) =>
+    isActive ? theme.color.primary70 : theme.color.gray05};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.color.gray00 : theme.color.gray40};
   border-radius: 8px 0 0 8px;
-  border: none;
+  border: ${({ theme, isActive }) => (isActive ? theme.color.gray10 : "none")};
   cursor: pointer;
   z-index: 1001;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);

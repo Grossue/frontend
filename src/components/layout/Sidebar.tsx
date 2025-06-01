@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled, { css } from "styled-components";
+import { useNavigate } from "react-router-dom";
 import { ReactComponent as Left } from "../../assets/Left.svg";
 import { ReactComponent as Right } from "../../assets/Right.svg";
 import { ReactComponent as Home } from "../../assets/Home.svg";
@@ -12,6 +13,7 @@ import FONT from "../../styles/font";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const navigate = useNavigate();
 
   return (
     <Container isOpen={isOpen}>
@@ -31,19 +33,19 @@ const Sidebar: React.FC = () => {
         </div>
       </Profile>
 
-      <MenuItem isOpen={isOpen}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/")}>
         <Home />
         <span style={FONT.md}>홈</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/dictionary")}>
         <Dic />
         <span style={FONT.md}>단어장</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/newsmemory")}>
         <Memory />
         <span style={FONT.md}>나의 뉴스 메모리</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/mypage")}>
         <MyPage />
         <span style={FONT.md}>마이페이지</span>
       </MenuItem>
@@ -131,6 +133,7 @@ const Profile = styled.div<{ isOpen: boolean }>`
 `;
 
 const MenuItem = styled.div<{ isOpen: boolean }>`
+  z-index: 10000;
   display: flex;
   align-items: center;
   gap: 12px;
