@@ -1,4 +1,4 @@
-const baseURL = "https://3.34.90.27/spring";
+const baseURL = "http://3.34.90.27/spring";
 
 const baseHeaders = {
   "Content-Type": "application/json",

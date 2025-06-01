@@ -1,32 +1,107 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import { useTheme } from "styled-components";
 import FONT from "../../styles/font";
+import { ReactComponent as Close } from "../../assets/Close.svg";
+import { ReactComponent as CorrectIcon } from "../../assets/O.svg";
+import { ReactComponent as WrongIcon } from "../../assets/X.svg";
 
-type Props = {
+interface Quiz {
+  question: string;
+  options: string[];
+  correct_answer: number; // 정답 인덱스
+}
+
+interface QuizPanelProps {
   isOpen: boolean;
   onClose: () => void;
-};
+  quizList: Quiz[];
+}
 
-const QuizPanel: React.FC<Props> = ({ isOpen, onClose }) => {
+const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
+  const theme = useTheme();
+
+  const [selectedAnswers, setSelectedAnswers] = useState<number[]>(
+    Array(quizList.length).fill(-1)
+  );
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleOptionChange = (quizIndex: number, optionIndex: number) => {
+    if (!isSubmitted) {
+      const newAnswers = [...selectedAnswers];
+      newAnswers[quizIndex] = optionIndex;
+      setSelectedAnswers(newAnswers);
+    }
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+  };
+
+  const handleRetry = () => {
+    setSelectedAnswers(Array(quizList.length).fill(-1));
+    setIsSubmitted(false);
+  };
+
   return (
     <PanelWrapper isOpen={isOpen}>
       <PanelHeader>
-        <CloseButton onClick={() => onClose()}>x</CloseButton>
+        <CloseButton onClick={onClose}>
+          <Close />
+        </CloseButton>
       </PanelHeader>
       <PanelContent>
-        {[1, 2, 3].map((i) => (
-          <Question key={i} style={FONT.md}>
+        {quizList.map((quiz, quizIndex) => (
+          <Question key={quizIndex} style={FONT.md}>
             <h4>
-              {i}. 2024년 글로벌 반도체 시장 성장률은 전년 대비 몇 %로
-              예상되는가?
+              {quizIndex + 1}. {quiz.question}
             </h4>
-            <input style={FONT.md} placeholder="label" />
-            <input style={FONT.md} placeholder="label" />
-            <input style={FONT.md} placeholder="label" />
+            {quiz.options.map((option, optionIndex) => {
+              const isSelected = selectedAnswers[quizIndex] === optionIndex;
+              const isCorrect = quiz.correct_answer === optionIndex;
+              const isAnswerChecked = isSubmitted;
+
+              let borderColor = "#ccc";
+              let icon = null;
+
+              if (isAnswerChecked) {
+                if (isSelected && isCorrect) {
+                  borderColor = theme.color.primary70;
+                  icon = <CorrectIcon />;
+                } else if (isSelected && !isCorrect) {
+                  borderColor = theme.color.warning;
+                  icon = <WrongIcon />;
+                } else if (!isSelected && isCorrect) {
+                  borderColor = theme.color.primary70;
+                }
+              }
+
+              return (
+                <OptionWrapper key={optionIndex}>
+                  <OptionInput
+                    isSelected={isSelected}
+                    isCorrect={isCorrect}
+                    isAnswerChecked={isAnswerChecked}
+                    onClick={() => handleOptionChange(quizIndex, optionIndex)}
+                    style={{ borderColor }}
+                  >
+                    {option}
+                    {isAnswerChecked && isSelected && icon && (
+                      <Icon>{icon}</Icon>
+                    )}
+                  </OptionInput>
+                </OptionWrapper>
+              );
+            })}
           </Question>
         ))}
       </PanelContent>
-      <SubmitButton>채점하기</SubmitButton>
+
+      {isSubmitted ? (
+        <SubmitButton onClick={handleRetry}>다시 풀기</SubmitButton>
+      ) : (
+        <SubmitButton onClick={handleSubmit}>채점하기</SubmitButton>
+      )}
     </PanelWrapper>
   );
 };
@@ -56,7 +131,7 @@ const PanelHeader = styled.div`
 
 const CloseButton = styled.button`
   position: absolute;
-  top: 10px;
+  top: 15px;
   left: 20px;
   background: transparent;
   border: none;
@@ -92,12 +167,56 @@ const Question = styled.div`
 `;
 
 const SubmitButton = styled.button`
-  background-color: ${({ theme }) => theme.color.gray10};
-  color: ${({ theme }) => theme.color.gray30};
-  border: none;
+  width: 100%;
   padding: 14px;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: ${({ theme }) => theme.color.gray20};
+  color: #fff;
   border-radius: 12px;
-  margin: 25px;
   cursor: pointer;
+  margin-top: 20px;
+  border: none;
+  transition: background 0.2s ease;
+  &:hover {
+    background-color: ${({ theme }) => theme.color.gray80};
+  }
+`;
+
+const OptionWrapper = styled.div`
+  position: relative;
+`;
+
+const OptionInput = styled.div<{
+  isSelected: boolean;
+  isCorrect: boolean;
+  isAnswerChecked: boolean;
+}>`
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: #fff;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  color: ${({ theme }) => theme.color.gray80};
+
+  transition: background 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color.gray10};
+  }
+
+  ${({ isSelected }) =>
+    isSelected &&
+    `
+    background-color: #f0f0f0;
+    font-weight: 600;
+  `}
+`;
+
+const Icon = styled.span`
+  position: absolute;
+  right: 10px;
+  top: 55%;
+  transform: translateY(-50%);
 `;
