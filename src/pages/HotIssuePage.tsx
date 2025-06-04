@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import HotIssue from "../HotIssue";
 
 const HotIssuePage: React.FC = () => {
-  const [keyword, setKeyword] = useState(""); // 검색어
+  const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
   const handleSearch = () => {
@@ -29,6 +30,8 @@ const HotIssuePage: React.FC = () => {
         <TagButton>IT/과학</TagButton>
         <TagButton>세계</TagButton>
       </TagList>
+
+      <HotIssue />
     </PageWrapper>
   );
 };
@@ -68,6 +71,7 @@ const SearchInput = styled.input`
     color: #aaa;
   }
 `;
+
 const Button = styled.button`
   padding: 14px 18px;
   background-color: #17b169;
@@ -80,11 +84,13 @@ const Button = styled.button`
     background-color: #13995c;
   }
 `;
+
 const TagList = styled.div`
   display: flex;
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 24px;
 `;
 
 const TagButton = styled.button`

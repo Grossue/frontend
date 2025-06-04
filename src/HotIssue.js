@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import newsData from './data/news.json';
 
 function HotIssue() {
   const categories = ['정치', '경제', '사회', '생활/문화', 'IT/과학', '세계'];
@@ -8,47 +8,34 @@ function HotIssue() {
   const today = new Date();
   const dateString = `${today.getMonth() + 1}월 ${today.getDate()}일`;
 
-  const [selectedCategory, setSelectedCategory] = useState('경제');
+  const [selectedCategory, setSelectedCategory] = useState('정치');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchArticles = async () => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get('http://localhost:3000/v1/isuue');
-      const data = response.data;
-
-      if (Array.isArray(data)) {
-        setArticles(data);
-        setTotalPages(Math.ceil(data.length / articlesPerPage));
-      } else {
-        setArticles([]);
-        setTotalPages(1);
-      }
-    } catch (error) {
-      console.error('API 호출 오류:', error);
-      setArticles([]);
-      setTotalPages(1);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchArticles();
-  }, []);
+    const categoryFiltered = newsData.filter(
+      (article) => article.category === selectedCategory
+    );
 
-  const filteredArticles = articles.filter((article) =>
-    article.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const searchFiltered = categoryFiltered.filter((article) =>
+      article.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    setFilteredArticles(searchFiltered);
+    setTotalPages(Math.ceil(searchFiltered.length / articlesPerPage));
+    setCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
 
   const paginatedArticles = filteredArticles.slice(
     (currentPage - 1) * articlesPerPage,
     currentPage * articlesPerPage
   );
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+  };
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -58,14 +45,9 @@ function HotIssue() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  const handleSearch = () => {
-    setCurrentPage(1);
-  };
-
   return (
     <div className="max-w-3xl mx-auto font-sans px-5 py-10">
       <p className="text-gray-500 text-sm text-center mb-1">{dateString}</p>
-
       <h2 className="text-2xl font-bold text-center mb-6">오늘의 핫한 이슈는?</h2>
 
       <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-6">
@@ -99,10 +81,7 @@ function HotIssue() {
         {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => {
-              setSelectedCategory(cat);
-              setCurrentPage(1);
-            }}
+            onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-2 rounded-full text-sm font-medium border ${
               selectedCategory === cat
                 ? 'border-gray-700 bg-gray-100 font-bold'
@@ -114,9 +93,7 @@ function HotIssue() {
         ))}
       </div>
 
-      {isLoading ? (
-        <p className="text-center text-gray-400">기사를 불러오고 있어요...</p>
-      ) : paginatedArticles.length === 0 ? (
+      {paginatedArticles.length === 0 ? (
         <p className="text-center text-gray-400">관련 기사가 없어요.</p>
       ) : (
         <div className="flex flex-col gap-3">
