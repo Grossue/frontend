@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import newsData from './data/news.json';
 
 function HotIssue() {
   const categories = ['정치', '경제', '사회', '생활/문화', 'IT/과학', '세계'];
   const articlesPerPage = 7;
+  const navigate = useNavigate();
 
   const today = new Date();
   const dateString = `${today.getMonth() + 1}월 ${today.getDate()}일`;
@@ -34,7 +36,13 @@ function HotIssue() {
   );
 
   const handleSearch = () => {
-    setCurrentPage(1);
+    if (searchQuery.trim()) {
+      navigate('/loading', { state: { keyword: searchQuery } });
+    }
+  };
+
+  const handleCategoryClick = (cat) => {
+    navigate('/loading', { state: { keyword: cat } });
   };
 
   const handlePrevPage = () => {
@@ -81,7 +89,7 @@ function HotIssue() {
         {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => setSelectedCategory(cat)}
+            onClick={() => handleCategoryClick(cat)}
             className={`px-4 py-2 rounded-full text-sm font-medium border ${
               selectedCategory === cat
                 ? 'border-gray-700 bg-gray-100 font-bold'
