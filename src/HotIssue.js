@@ -1,39 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import newsData from './data/news.json';
 
 function HotIssue() {
   const categories = ['정치', '경제', '사회', '생활/문화', 'IT/과학', '세계'];
-  const articlesPerPage = 7;
   const navigate = useNavigate();
-
   const today = new Date();
   const dateString = `${today.getMonth() + 1}월 ${today.getDate()}일`;
 
-  const [selectedCategory, setSelectedCategory] = useState('정치');
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredArticles, setFilteredArticles] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-
-  useEffect(() => {
-    const categoryFiltered = newsData.filter(
-      (article) => article.category === selectedCategory
-    );
-
-    const searchFiltered = categoryFiltered.filter((article) =>
-      article.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
-    setFilteredArticles(searchFiltered);
-    setTotalPages(Math.ceil(searchFiltered.length / articlesPerPage));
-    setCurrentPage(1);
-  }, [selectedCategory, searchQuery]);
-
-  const paginatedArticles = filteredArticles.slice(
-    (currentPage - 1) * articlesPerPage,
-    currentPage * articlesPerPage
-  );
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -42,15 +16,30 @@ function HotIssue() {
   };
 
   const handleCategoryClick = (cat) => {
-    navigate('/loading', { state: { keyword: cat } });
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+    let exampleTopic = '';
+    switch (cat) {
+      case '정치':
+        exampleTopic = '총선 결과';
+        break;
+      case '경제':
+        exampleTopic = '삼성 주가';
+        break;
+      case '사회':
+        exampleTopic = '청년 실업률';
+        break;
+      case '생활/문화':
+        exampleTopic = '부산국제영화제';
+        break;
+      case 'IT/과학':
+        exampleTopic = 'AI 기술 발전';
+        break;
+      case '세계':
+        exampleTopic = '미국 대선';
+        break;
+      default:
+        exampleTopic = cat;
+    }
+    setSearchQuery(exampleTopic);
   };
 
   return (
@@ -90,66 +79,11 @@ function HotIssue() {
           <button
             key={cat}
             onClick={() => handleCategoryClick(cat)}
-            className={`px-4 py-2 rounded-full text-sm font-medium border ${
-              selectedCategory === cat
-                ? 'border-gray-700 bg-gray-100 font-bold'
-                : 'border-gray-300 bg-white'
-            }`}
+            className="px-4 py-2 rounded-full text-sm font-medium border border-gray-300 bg-white hover:bg-gray-100"
           >
             {cat}
           </button>
         ))}
-      </div>
-
-      {paginatedArticles.length === 0 ? (
-        <p className="text-center text-gray-400">관련 기사가 없어요.</p>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {paginatedArticles.map((article, index) => (
-            <a
-              key={index}
-              href={article.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center bg-gray-100 rounded-lg px-4 py-3 shadow-sm text-black no-underline hover:bg-gray-200 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="none"
-                stroke="#2e8b57"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                viewBox="0 0 24 24"
-                className="mr-2"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <span className="text-sm">{article.title}</span>
-            </a>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-8 flex justify-center items-center gap-4">
-        <button
-          onClick={handlePrevPage}
-          disabled={currentPage === 1}
-          className="text-lg disabled:text-gray-300"
-        >
-          &lt;
-        </button>
-        <span className="text-sm text-gray-500">{`${currentPage} / ${totalPages}`}</span>
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className="text-lg disabled:text-gray-300"
-        >
-          &gt;
-        </button>
       </div>
     </div>
   );

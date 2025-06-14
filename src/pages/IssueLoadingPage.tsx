@@ -12,37 +12,27 @@ const loadingMessages = [
   "우리 개발자들이 땀 흘리며 데이터 긁어오는 중…",
 ];
 
-interface Data {
-  ai_result: [];
-  session_id: string;
-}
-
 const IssueLoadingPage: React.FC = () => {
   const [index, setIndex] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const keyword = (location.state as { keyword: string })?.keyword;
-  const [data, setData] = useState<Data[]>([]); // data
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // 기사 생성 api 연동
   useEffect(() => {
     const fetchData = async () => {
-      if (!keyword.trim()) return; // 아무것도 입력안할때
+      if (!keyword?.trim()) return;
+
+      console.log("받은 키워드:", keyword);
 
       try {
-        // 테스트용
-        const response = await getArticleGeneral("관세", "LEVEL1", true);
-        console.log("기사 생성:", response.data);
-        setData(response.data);
-
+        const response = await getArticleGeneral(keyword, "LEVEL1", true);
         navigate("/reading", {
           state: { content: response.data },
         });
@@ -51,7 +41,7 @@ const IssueLoadingPage: React.FC = () => {
       }
     };
     fetchData();
-  }, [data, keyword, navigate]);
+  }, [keyword, navigate]);
 
   return (
     <Wrapper>
@@ -75,6 +65,7 @@ const IssueLoadingPage: React.FC = () => {
 };
 
 export default IssueLoadingPage;
+
 const bounce = keyframes`
   0%, 80%, 100% {
     transform: scale(0.8);

@@ -1,50 +1,23 @@
 import React, { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import styled, { css, keyframes } from "styled-components";
+import { useLocation } from "react-router-dom";
+import styled from "styled-components";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
 import FONT from "../styles/font";
 import { ReactComponent as Close } from "../assets/Close.svg";
 import { ReactComponent as Book } from "../assets/Book.svg";
 
-interface Data {
-  ai_result: AI_Result;
-  session_id: string;
-}
-
-interface AI_Result {
-  title: string;
-  article: string;
-  quiz: Quiz[];
-  url: Url[];
-  summary: string;
-  words: Word[];
-  image_url: string;
-}
-
-interface Quiz {
-  question: string;
-  options: string[];
-  correct_answer: number;
-}
-
-interface Url {
-  title: string;
-  url: string;
-}
-
-interface Word {
-  term: string;
-  explanation: string;
-}
-
 const IssueReading = () => {
   const location = useLocation();
   const data = (location.state as { content: Data })?.content;
-  const ai_result = data.ai_result;
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const ai_result = data?.ai_result;
 
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
   const [popupContent, setPopupContent] = useState<Word | null>(null);
+
+  if (!ai_result) {
+    return <div>데이터를 불러오지 못했습니다.</div>;
+  }
 
   const handleWordClick = (word: Word) => {
     setPopupContent(word);
@@ -57,7 +30,6 @@ const IssueReading = () => {
   const highlightWords = (text: string, words: Word[]) => {
     const terms = words.map((w) => w.term);
     const pattern = new RegExp(`(${terms.join("|")})`, "g");
-
     const parts = text.split(pattern);
 
     return parts.map((part, i) => {
@@ -72,6 +44,7 @@ const IssueReading = () => {
       return <span key={i}>{part}</span>;
     });
   };
+
   return (
     <Container isQuizOpen={isQuizOpen}>
       <ArticleBox isQuizOpen={isQuizOpen}>
@@ -132,20 +105,54 @@ const IssueReading = () => {
 
 export default IssueReading;
 
+interface Data {
+  ai_result: AI_Result;
+  session_id: string;
+}
+
+interface AI_Result {
+  title: string;
+  article: string;
+  quiz: Quiz[];
+  url: Url[];
+  summary: string;
+  words: Word[];
+  image_url: string;
+}
+
+interface Quiz {
+  question: string;
+  options: string[];
+  correct_answer: number;
+}
+
+interface Url {
+  title: string;
+  url: string;
+}
+
+interface Word {
+  term: string;
+  explanation: string;
+}
+
 const Container = styled.div<{ isQuizOpen: boolean }>`
   width: 100vw;
   height: 100vh;
   position: relative;
   overflow-x: hidden;
 `;
+
 const Title = styled.div`
   color: ${({ theme }) => theme.color.gray80};
   font-weight: 600;
   margin-bottom: 10px;
 `;
+
 const SubTitle = styled.div`
   color: ${({ theme }) => theme.color.gray40};
 `;
+
 const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
   width: 800px;
   margin: 50px auto;
@@ -154,6 +161,7 @@ const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
   transform: ${({ isQuizOpen }) =>
     isQuizOpen ? `translateX(-100px)` : "translateX(0)"};
 `;
+
 const Img = styled.div`
   width: 800px;
   height: 320px;
@@ -166,16 +174,19 @@ const Img = styled.div`
     object-fit: cover;
   }
 `;
+
 const Article = styled.div`
   color: ${({ theme }) => theme.color.gray80};
   line-height: 160%;
   margin: 30px 0;
 `;
+
 const Line = styled.div`
   height: 1px;
   margin: 20px 0;
   border: 1px solid ${({ theme }) => theme.color.gray10};
 `;
+
 const SummaryTitle = styled.div`
   color: ${({ theme }) => theme.color.primary70};
   display: flex;
@@ -185,6 +196,7 @@ const SummaryTitle = styled.div`
     margin-right: 10px;
   }
 `;
+
 const SummaryBox = styled.div`
   width: 800px;
   border-radius: 20px;
@@ -193,12 +205,13 @@ const SummaryBox = styled.div`
   padding: 30px 20px;
   background-color: ${({ theme }) => theme.color.gray05};
 `;
+
 const Summary = styled.div`
   color: ${({ theme }) => theme.color.gray80};
 `;
 
 const HighlightedWord = styled.span`
-  background-color: ${({ theme }) => theme.color.primary10}; // 원하는 색
+  background-color: ${({ theme }) => theme.color.primary10};
   color: ${({ theme }) => theme.color.primary70};
   cursor: pointer;
   font-weight: 600;
@@ -209,6 +222,7 @@ const HighlightedWord = styled.span`
     background-color: ${({ theme }) => theme.color.primary20};
   }
 `;
+
 const PopupOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -235,14 +249,16 @@ const PopupBox = styled.div`
 
 const PopupTitle = styled.div`
   display: flex;
-  align-items: baseline; /* 아래줄 맞춤 */
+  align-items: baseline;
   margin-bottom: 12px;
   color: ${({ theme }) => theme.color.primary70};
 `;
+
 const PopupAI = styled.span`
   margin-left: 5px;
   color: ${({ theme }) => theme.color.gray30};
 `;
+
 const PopupText = styled.div`
   color: ${({ theme }) => theme.color.gray50};
 `;
