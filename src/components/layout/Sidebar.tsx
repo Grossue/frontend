@@ -22,7 +22,7 @@ const Sidebar: React.FC = () => {
       </ToggleButton>
 
       <Profile isOpen={isOpen}>
-        <img src="" />
+        <img src="/grossueLogo.png" alt="프로필 사진" />
         <div>
           <span id="name" style={FONT.lg}>
             김구름

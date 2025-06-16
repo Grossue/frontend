@@ -39,7 +39,7 @@ const IssueLoadingPage: React.FC = () => {
 
       try {
         // 테스트용
-        const response = await getArticleGeneral("관세", "LEVEL1", true);
+        const response = await getArticleGeneral(keyword, "LEVEL2", false); // 레벨 설정
         console.log("기사 생성:", response.data);
         setData(response.data);
 
@@ -51,7 +51,7 @@ const IssueLoadingPage: React.FC = () => {
       }
     };
     fetchData();
-  }, [data, keyword, navigate]);
+  }, []);
 
   return (
     <Wrapper>
@@ -118,7 +118,8 @@ const TextMain = styled.div`
 
 const TextSub = styled.div`
   font-size: 14px;
-  color: #999;
+  color: "#17b169";
+  margin: 20px 0px;
 `;
 
 const Sub = styled.div`

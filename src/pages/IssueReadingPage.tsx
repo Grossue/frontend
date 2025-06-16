@@ -6,6 +6,8 @@ import QuizPanel from "../components/reading/QuizPanel";
 import FONT from "../styles/font";
 import { ReactComponent as Close } from "../assets/Close.svg";
 import { ReactComponent as Book } from "../assets/Book.svg";
+import { ReactComponent as UrlIcon } from "../assets/Url.svg";
+import { ReactComponent as UrlToggle } from "../assets/UrlToggle.svg";
 
 interface Data {
   ai_result: AI_Result;
@@ -77,8 +79,19 @@ const IssueReading = () => {
       <ArticleBox isQuizOpen={isQuizOpen}>
         <Title style={FONT.xxl}>{ai_result.title}</Title>
         <SubTitle style={FONT.xl}>
-          총 {ai_result.url.length}개의 기사를 요약했어요. {">"}
+          총 {ai_result.url.length}개의 기사를 요약했어요.{" "}
+          <UrlToggle id="toggle" />
         </SubTitle>
+        <UrlBox style={FONT.md}>
+          {ai_result.url.map((item, index) => (
+            <Url key={index}>
+              <UrlIcon id="icon" />
+              <a href={item.url} target="_blank" rel="noopener noreferrer">
+                {item.title}
+              </a>
+            </Url>
+          ))}
+        </UrlBox>
         <Line />
         <Img>
           <img src={ai_result.image_url} alt="기사 이미지" />
@@ -145,6 +158,33 @@ const Title = styled.div`
 `;
 const SubTitle = styled.div`
   color: ${({ theme }) => theme.color.gray40};
+  #toggle {
+    vertical-align: middle;
+  }
+`;
+const UrlBox = styled.div``;
+const Url = styled.div`
+  width: fit-content;
+  background-color: ${({ theme }) => theme.color.gray05};
+  border-radius: 30px;
+  padding: 5px 15px;
+  margin: 10px 0px;
+  color: ${({ theme }) => theme.color.gray40};
+
+  #icon {
+    //margin-top: 10px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: ${({ theme }) => theme.color.primary70};
+      text-decoration: underline;
+    }
+  }
 `;
 const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
   width: 800px;
@@ -156,14 +196,15 @@ const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
 `;
 const Img = styled.div`
   width: 800px;
-  height: 320px;
+  height: 400px;
   border-radius: 12px;
 
   img {
     width: 800px;
-    height: 320px;
+    height: 400px;
     border-radius: 12px;
     object-fit: cover;
+    object-position: top;
   }
 `;
 const Article = styled.div`

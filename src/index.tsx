@@ -12,10 +12,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <ThemeProvider theme={theme}>
-    <React.StrictMode>
-      <GlobalStyle />
-      <App />
-    </React.StrictMode>
+    {/*<React.StrictMode>*/}
+    <GlobalStyle />
+    <App />
+    {/*</React.StrictMode>*/}
   </ThemeProvider>
 );
 
