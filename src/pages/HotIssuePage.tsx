@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as GraySearch } from "../assets/GraySearch.svg";
@@ -140,7 +140,6 @@ const PageWrapper = styled.div`
   padding: 60px 0;
   text-align: center;
 `;
-
 const DateText = styled.p`
   font-size: 18px;
   color: #7e7e8a;
@@ -252,3 +251,4 @@ const PageButton = styled.button<{ active?: boolean }>`
     background-color: ${({ active }) => (active ? "#13995c" : "#ddd")};
   }
 `;
+

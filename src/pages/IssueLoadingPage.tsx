@@ -12,23 +12,16 @@ const loadingMessages = [
   "우리 개발자들이 땀 흘리며 데이터 긁어오는 중…",
 ];
 
-interface Data {
-  ai_result: [];
-  session_id: string;
-}
-
 const IssueLoadingPage: React.FC = () => {
   const [index, setIndex] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const keyword = (location.state as { keyword: string })?.keyword;
-  const [data, setData] = useState<Data[]>([]); // data
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -75,6 +68,7 @@ const IssueLoadingPage: React.FC = () => {
 };
 
 export default IssueLoadingPage;
+
 const bounce = keyframes`
   0%, 80%, 100% {
     transform: scale(0.8);
