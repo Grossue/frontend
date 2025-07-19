@@ -3,7 +3,7 @@ import { request } from "./client";
 export const getDictionary = async (keyword: string) => {
   try {
     const res = await request.get({
-      url: `/v1/dictionary/word?keyword=${keyword}`,
+      url: `/v1/dictionary?keyword=${keyword}`,
       params: {},
     });
     console.log("사전 검색 완료", res);
@@ -14,11 +14,19 @@ export const getDictionary = async (keyword: string) => {
   }
 };
 
-export const postDictionary = async () => {
+export const postDictionary = async (data: {
+  word: string;
+  definition: string;
+  type: string;
+  link: string;
+  targetCode: string;
+  supNo: string;
+  pos: string;
+}) => {
   try {
     const res = await request.post({
       url: `/v1/dictionary/word`,
-      params: {},
+      data: data,
     });
     console.log("단어장 - 단어 추가 성공", res);
     return res;
