@@ -1,11 +1,11 @@
-const baseURL = "http://3.34.90.27/spring";
+const baseURL = "http://localhost:8080";
 
 const baseHeaders = {
   "Content-Type": "application/json",
 };
 
 const getHeadersWithToken = () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("accessToken");
   return token
     ? { ...baseHeaders, Authorization: `Bearer ${token}` }
     : { ...baseHeaders };
