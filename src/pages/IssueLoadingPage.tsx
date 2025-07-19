@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import styled, { keyframes } from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import FONT from "../styles/font";
-import { getArticleGeneral } from "../api/Reading";
+import { getArticle } from "../api/Reading";
 
 const loadingMessages = [
   "관련 기사를 검색하고 있어요 🔍 \n당신을 위한 맞춤형 정보를 찾는 중이에요.",
   "기사 분석 중입니다 🧠 \n내용을 바탕으로 어휘와 표현을 추출하고 있어요.",
   "퀴즈를 생성하고 있어요 📝 \n빈칸 채우기, 어휘 문제 등 다양하게 구성 중입니다!",
   "거의 다 됐어요! 🚀 \n곧 단어 설명과 문제를 확인할 수 있어요.",
-  "우리 개발자들이 땀 흘리며 데이터 긁어오는 중…",
+  "우리 개발자들이 땀 흘리며 데이터 긁어오는 중…😅",
 ];
 
 interface Data {
@@ -39,7 +39,8 @@ const IssueLoadingPage: React.FC = () => {
 
       try {
         // 테스트용
-        const response = await getArticleGeneral(keyword, "LEVEL2", false); // 레벨 설정
+        const response = await getArticle(keyword, "GENERAL", "LEVEL1", false); // 레벨 설정
+        //const response = await getArticle("네이버", "GENERAL", "LEVEL2", true); // 레벨 설정
         console.log("기사 생성:", response.data);
         setData(response.data);
 
@@ -60,9 +61,9 @@ const IssueLoadingPage: React.FC = () => {
         <Dot delay="0.2s" color="#79d9a8" />
         <Dot delay="0.4s" color="#0fa958" />
       </Dots>
-      <TextMain style={FONT.xxl}>글을 가져오고 있어요</TextMain>
-      <TextSub style={FONT.xl}>{keyword}</TextSub>
-      <Sub style={FONT.xxl}>
+      <TextMain style={FONT.xxl.bold}>글을 가져오고 있어요</TextMain>
+      <TextSub style={FONT.xl.bold}>{keyword}</TextSub>
+      <Sub style={FONT.xxl.bold}>
         {loadingMessages[index].split("\n").map((line, i) => (
           <span key={i}>
             {line}

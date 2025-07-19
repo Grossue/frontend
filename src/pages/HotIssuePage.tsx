@@ -19,7 +19,6 @@ const issues = [
   "음식점과 가정에서 음식물 쓰레기 처리에 대한 이해와 해결책",
   "'SKT 해킹 사건으로 인한 가입자 55만명 KT·LGU+로 이동'",
   "AMD와 삼성, KAI 협력 강화...AI 발전 및 장기 협력 기대감 상승",
-  "더본코리아의 조직 개편과 AMD의 AI 활용, 창업과 개발자 능률 향상을 위한 새로운 시도",
   "네이버와 엔비디아, AI 데이터센터를 통한 유럽 공략 및 통합 플랫폼 시대 주도 예상",
   "LG CNS, 상장 후 첫 공모가 돌파로 주가 급등",
   "AMD, 삼성 HBM3E 탑재한 차세대 AI 가속기 'MI350' 공개",
@@ -31,15 +30,11 @@ const issues = [
   "인플루엔자 유행주의보 해제, 코로나19에 대한 주의 강조",
   "애플과 삼성, AI 및 폴더블폰 업그레이드로 화웨이와 경쟁 본격화",
   "의학계, 폐쇄적 소통과 감정적 대응에 대한 비판과 환자 중심 정책 요구",
-  "전북대·이대, 40만 학생 정보 누출로 과징금 9억 부과",
   "AMD와 네이버, AI 기술 개발 강화 및 에이전트 시대 본격화",
-  "'오징어게임' 美 흥행의 비결, '진정성 있는 더빙'으로 분석",
-  "이 대통령, 오광수 민정수석 사표 수리 및 3대 특검에 조은석·민중기·이명현 지명",
   "해저 케이블 보호와 중국 다롄항 수상한 구조물 탐사에 투입된 수중 로봇",
   "삼성전자의 새 슈퍼컴퓨터, 세계 18위 데뷔로 한국 종합 순위 9위 달성",
   "'리튬 부족 위기, 대안전지 개발 시급'",
   "미국, 냉장고·세탁기에 50% 철강관세 부과로 한국 가전업계 타격",
-  "KT, 6월 멤버십 혜택으로 '야구 보며 치킨 먹기' 공개",
 ];
 
 const HotIssuePage: React.FC = () => {
@@ -74,7 +69,7 @@ const HotIssuePage: React.FC = () => {
 
   return (
     <PageWrapper>
-      <DateText>6월 17일</DateText>
+      <DateText>6월 13일</DateText>
       <Title>오늘의 핫한 이슈는?</Title>
       <SearchInput
         value={keyword}
@@ -148,13 +143,14 @@ const DateText = styled.p`
 `;
 
 const Title = styled.h2`
-  font-size: 24px;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 32px;
+  margin-top: 20px;
 `;
 
 const SearchInput = styled.input`
-  width: 360px;
+  width: 530px;
   padding: 14px 18px;
   margin: 0px 3px;
   border: none;
@@ -170,7 +166,7 @@ const SearchInput = styled.input`
   }
 `;
 const Button = styled.button`
-  padding: 14px 18px;
+  padding: 14px 20px;
   background-color: #17b169;
   color: white;
   border: none;
@@ -184,7 +180,7 @@ const Button = styled.button`
 const TagList = styled.div`
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 15px;
   flex-wrap: wrap;
 `;
 
@@ -192,7 +188,7 @@ const TagButton = styled.button<{ active?: boolean }>`
   background-color: ${({ active }) => (active ? "#17b169" : "#f2f2f4")};
   color: ${({ active }) => (active ? "white" : "#4e4e57")};
   border: none;
-  padding: 8px 16px;
+  padding: 8px 20px;
   border-radius: 18px;
   font-size: 14px;
   cursor: pointer;
@@ -202,11 +198,11 @@ const TagButton = styled.button<{ active?: boolean }>`
   }
 `;
 const IssueList = styled.div`
-  margin-top: 40px;
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 480px;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 `;
@@ -217,11 +213,12 @@ const IssueItem = styled.div`
   border-radius: 12px;
   text-align: left;
   color: #333;
-  font-size: 15px;
+  font-size: 17px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
+  margin: 2px 0px;
 
   &:hover {
     background-color: #eaeaec;
