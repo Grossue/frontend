@@ -1,48 +1,25 @@
 import { CSSProperties } from "react";
-
 const fontFamily = `"Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
 
+const createFontStyle = (
+  fontSize: string,
+  lineHeight: string,
+): Record<'regular' | 'medium' | 'semibold' | 'bold', CSSProperties> => ({
+  regular: { fontSize, lineHeight, fontFamily, fontWeight: 400 },
+  medium: { fontSize, lineHeight, fontFamily, fontWeight: 500 },
+  semibold: { fontSize, lineHeight, fontFamily, fontWeight: 600 },
+  bold: { fontSize, lineHeight, fontFamily, fontWeight: 700 },
+});
+
 const FONT = {
-  xxxl: {
-    fontSize: "32px",
-    lineHeight: "150%",
-    fontFamily,
-  } as CSSProperties,
-  xxl: {
-    fontSize: "24px",
-    lineHeight: "150%",
-    fontFamily,
-  } as CSSProperties,
-  xl: {
-    fontSize: "20px",
-    lineHeight: "150%",
-    fontFamily,
-  } as CSSProperties,
-  lg: {
-    fontSize: "18px",
-    lineHeight: "160%",
-    fontFamily,
-  } as CSSProperties,
-  md: {
-    fontSize: "16px",
-    lineHeight: "160%",
-    fontFamily,
-  } as CSSProperties,
-  sm: {
-    fontSize: "14px",
-    lineHeight: "150%",
-    fontFamily,
-  } as CSSProperties,
-  xs: {
-    fontSize: "12px",
-    lineHeight: "150%",
-    fontFamily,
-  } as CSSProperties,
-  xxs: {
-    fontSize: "10px",
-    lineHeight: "120%",
-    fontFamily,
-  } as CSSProperties,
+  xxxl: createFontStyle("32px", "150%"),
+  xxl: createFontStyle("24px", "150%"),
+  xl: createFontStyle("20px", "150%"),
+  lg: createFontStyle("18px", "160%"),
+  md: createFontStyle("16px", "160%"),
+  sm: createFontStyle("14px", "150%"),
+  xs: createFontStyle("12px", "150%"),
+  xxs: createFontStyle("10px", "120%"),
 };
 
 export default FONT;
