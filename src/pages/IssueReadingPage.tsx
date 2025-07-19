@@ -3,6 +3,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
+import DictionaryToggle from "../components/reading/DictionaryToggle";
+import DictionaryPanel from "../components/reading/DictionaryPanel";
+import QnaToggle from "../components/reading/QnaToggle";
+import QnaPanel from "../components/reading/QnaPanel";
 import FONT from "../styles/font";
 import { ReactComponent as Close } from "../assets/Close.svg";
 import { ReactComponent as Book } from "../assets/Book.svg";
@@ -12,6 +16,8 @@ import { ReactComponent as UrlToggle } from "../assets/UrlToggle.svg";
 interface Data {
   ai_result: AI_Result;
   session_id: string;
+  level: string;
+  article_type: string;
 }
 
 interface AI_Result {
@@ -44,7 +50,13 @@ const IssueReading = () => {
   const location = useLocation();
   const data = (location.state as { content: Data })?.content;
   const ai_result = data.ai_result;
+  const sessionId = data.session_id;
+
+  // 우측 슬라이드 탭
   const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isDictOpen, setIsDictOpen] = useState(false);
+  const [isQnaOpen, setIsQnaOpen] = useState(false);
+  const isAnyOpen = isQuizOpen || isDictOpen || isQnaOpen;
 
   const [popupContent, setPopupContent] = useState<Word | null>(null);
 
@@ -76,13 +88,13 @@ const IssueReading = () => {
   };
   return (
     <Container isQuizOpen={isQuizOpen}>
-      <ArticleBox isQuizOpen={isQuizOpen}>
-        <Title style={FONT.xxl}>{ai_result.title}</Title>
-        <SubTitle style={FONT.xl}>
+      <ArticleBox isQuizOpen={isQuizOpen || isDictOpen}>
+        <Title style={FONT.xxl.bold}>{ai_result.title}</Title>
+        <SubTitle style={FONT.xl.bold}>
           총 {ai_result.url.length}개의 기사를 요약했어요.{" "}
           <UrlToggle id="toggle" />
         </SubTitle>
-        <UrlBox style={FONT.md}>
+        <UrlBox style={FONT.md.bold}>
           {ai_result.url.map((item, index) => (
             <Url key={index}>
               <UrlIcon id="icon" />
@@ -106,7 +118,7 @@ const IssueReading = () => {
           ))}
         </Article>
         <Line />
-        <SummaryTitle style={FONT.xxl}>
+        <SummaryTitle style={FONT.xxl.bold}>
           <span>
             <Book />
           </span>
@@ -114,25 +126,61 @@ const IssueReading = () => {
           AI 요약
         </SummaryTitle>
         <SummaryBox>
-          <Summary style={FONT.md}>{ai_result.summary}</Summary>
+          <Summary style={FONT.md.bold}>{ai_result.summary}</Summary>
         </SummaryBox>
       </ArticleBox>
-      <QuizToggle isActive={isQuizOpen} onClick={() => setIsQuizOpen(true)} />
+      <QuizToggle
+        isActive={isQuizOpen} // 색깔용
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(true);
+          setIsQnaOpen(false);
+          setIsDictOpen(false);
+        }}
+      />
+      <QnaToggle
+        isActive={isQnaOpen}
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(false);
+          setIsQnaOpen(true);
+          setIsDictOpen(false);
+        }}
+      />
+      <DictionaryToggle
+        isActive={isDictOpen} // 색깔용
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(false);
+          setIsQnaOpen(false);
+          setIsDictOpen(true);
+        }}
+      />
+
       <QuizPanel
         isOpen={isQuizOpen}
-        onClose={() => {
-          setIsQuizOpen(false);
-        }}
+        onClose={() => setIsQuizOpen(false)}
         quizList={ai_result.quiz}
+      />
+      <DictionaryPanel
+        isOpen={isDictOpen}
+        onClose={() => setIsDictOpen(false)}
+      />
+      <QnaPanel
+        isOpen={isQnaOpen}
+        onClose={() => setIsQnaOpen(false)}
+        sessionId={sessionId}
       />
       {popupContent && (
         <PopupOverlay onClick={closePopup}>
           <PopupBox onClick={(e) => e.stopPropagation()}>
-            <PopupTitle style={FONT.xl}>
+            <PopupTitle style={FONT.xl.bold}>
               {popupContent.term}
-              <PopupAI style={FONT.sm}>AI 용어 설명</PopupAI>
+              <PopupAI style={FONT.sm.bold}>AI 용어 설명</PopupAI>
             </PopupTitle>
-            <PopupText style={FONT.lg}>: {popupContent.explanation}</PopupText>
+            <PopupText style={FONT.lg.bold}>
+              : {popupContent.explanation}
+            </PopupText>
             <PopupClose onClick={closePopup}>
               <Close />
             </PopupClose>

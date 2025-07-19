@@ -52,7 +52,7 @@ const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
       </PanelHeader>
       <PanelContent>
         {quizList.map((quiz, quizIndex) => (
-          <Question key={quizIndex} style={FONT.md}>
+          <Question key={quizIndex} style={FONT.md.medium}>
             <h4>
               {quizIndex + 1}. {quiz.question}
             </h4>
