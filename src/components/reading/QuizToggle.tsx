@@ -4,12 +4,18 @@ import FONT from "../../styles/font";
 
 type Props = {
   isActive: boolean;
+  isAnyOpen: boolean;
   onClick: () => void;
 };
 
-const QuizToggle: React.FC<Props> = ({ isActive, onClick }) => {
+const QuizToggle: React.FC<Props> = ({ isActive, isAnyOpen, onClick }) => {
   return (
-    <Tab style={FONT.md} isActive={isActive} onClick={onClick}>
+    <Tab
+      style={FONT.md.medium}
+      isActive={isActive}
+      isAnyOpen={isAnyOpen}
+      onClick={onClick}
+    >
       QUIZ
     </Tab>
   );
@@ -17,12 +23,12 @@ const QuizToggle: React.FC<Props> = ({ isActive, onClick }) => {
 
 export default QuizToggle;
 
-const Tab = styled.button<{ isActive: boolean }>`
+const Tab = styled.button<{ isActive: boolean; isAnyOpen: boolean }>`
   position: fixed;
   width: 70px;
   height: 38px;
   top: 100px;
-  right: ${({ isActive }) => (isActive ? "400px" : "0")};
+  right: ${({ isAnyOpen }) => (isAnyOpen ? "400px" : "0")};
   transition: right 0.3s ease;
   background: ${({ theme, isActive }) =>
     isActive ? theme.color.primary70 : theme.color.gray05};
