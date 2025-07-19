@@ -13,7 +13,21 @@ import FONT from "../../styles/font";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
+  const [isLogIn, setIsLogIn] = useState<boolean>(
+    !!localStorage.getItem("accessToken")
+  );
+
   const navigate = useNavigate();
+
+  const handleAuthClick = () => {
+    if (isLogIn) {
+      localStorage.removeItem("accessToken");
+      setIsLogIn(false);
+      navigate("/login");
+    } else {
+      navigate("/login");
+    }
+  };
 
   return (
     <Container isOpen={isOpen}>
@@ -24,10 +38,10 @@ const Sidebar: React.FC = () => {
       <Profile isOpen={isOpen}>
         <img src="/grossueLogo.png" alt="프로필 사진" />
         <div>
-          <span id="name" style={FONT.lg}>
+          <span id="name" style={FONT.lg.bold}>
             김구름
           </span>
-          <span id="level" style={FONT.md}>
+          <span id="level" style={FONT.md.medium}>
             새싹 * 0점
           </span>
         </div>
@@ -35,26 +49,26 @@ const Sidebar: React.FC = () => {
 
       <MenuItem isOpen={isOpen} onClick={() => navigate("/")}>
         <Home />
-        <span style={FONT.md}>홈</span>
+        <span style={FONT.md.medium}>홈</span>
       </MenuItem>
       <MenuItem isOpen={isOpen} onClick={() => navigate("/dictionary")}>
         <Dic />
-        <span style={FONT.md}>단어장</span>
+        <span style={FONT.md.medium}>단어장</span>
       </MenuItem>
       <MenuItem isOpen={isOpen} onClick={() => navigate("/newsmemory")}>
         <Memory />
-        <span style={FONT.md}>나의 뉴스 메모리</span>
+        <span style={FONT.md.medium}>나의 뉴스 메모리</span>
       </MenuItem>
       <MenuItem isOpen={isOpen} onClick={() => navigate("/mypage")}>
         <MyPage />
-        <span style={FONT.md}>마이페이지</span>
+        <span style={FONT.md.medium}>마이페이지</span>
       </MenuItem>
 
       <Spacer />
 
-      <MenuItem isOpen={isOpen}>
+      <MenuItem isOpen={isOpen} onClick={handleAuthClick}>
         <Logout />
-        <span style={FONT.md}>로그아웃</span>
+        <span style={FONT.md.medium}>{isLogIn ? "로그아웃" : "로그인"}</span>
       </MenuItem>
 
       <Footer isOpen={isOpen}>
