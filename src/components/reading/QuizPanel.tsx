@@ -11,20 +11,43 @@ interface Quiz {
   options: string[];
   correct_answer: number; // 정답 인덱스
 }
-
+interface Short_Answer_Question {
+  example_answers: string[];
+  question: string;
+}
+interface Thinking_Question {
+  example_answers: string[];
+  question: string;
+}
 interface QuizPanelProps {
   isOpen: boolean;
   onClose: () => void;
   quizList: Quiz[];
+  short_answer_question: Short_Answer_Question;
+  thinking_question: Thinking_Question;
+  onReward?: () => void;
+  onThinking?: () => void;
 }
 
-const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
+const QuizPanel: React.FC<QuizPanelProps> = ({
+  isOpen,
+  onClose,
+  quizList,
+  short_answer_question,
+  thinking_question,
+  onReward,
+  onThinking,
+}) => {
   const theme = useTheme();
 
   const [selectedAnswers, setSelectedAnswers] = useState<number[]>(
     Array(quizList.length).fill(-1)
   );
+
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const [shortAnswer, setShortAnswer] = useState("");
+  const [thinkingAnswer, setThinkingAnswer] = useState("");
 
   const handleOptionChange = (quizIndex: number, optionIndex: number) => {
     if (!isSubmitted) {
@@ -36,11 +59,19 @@ const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
 
   const handleSubmit = () => {
     setIsSubmitted(true);
+    if (onReward) onReward(); // 채점 후 모달 호출
   };
 
   const handleRetry = () => {
     setSelectedAnswers(Array(quizList.length).fill(-1));
     setIsSubmitted(false);
+  };
+
+  // 생각해보기 예시답안
+  const [isThinking, setIsThinking] = useState(false);
+  const handleThinking = () => {
+    setIsThinking(true);
+    if (onThinking) onThinking(); // 예시답안 모달 호출
   };
 
   return (
@@ -51,6 +82,7 @@ const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
         </CloseButton>
       </PanelHeader>
       <PanelContent>
+        {/* 기존 선다형 퀴즈 */}
         {quizList.map((quiz, quizIndex) => (
           <Question key={quizIndex} style={FONT.md.medium}>
             <h4>
@@ -95,10 +127,65 @@ const QuizPanel: React.FC<QuizPanelProps> = ({ isOpen, onClose, quizList }) => {
             })}
           </Question>
         ))}
+
+        {/* 단답형 문제 */}
+        <Question style={FONT.md.medium}>
+          <h4>4. [단답형] {short_answer_question.question}</h4>
+          <textarea
+            placeholder="여기에 답을 입력하세요"
+            value={shortAnswer}
+            onChange={(e) => setShortAnswer(e.target.value)}
+            style={{
+              width: "100%",
+              minHeight: "80px",
+              borderRadius: "8px",
+              border: `2px solid ${isSubmitted ? "#9333ea" : "#ccc"}`, // 보라색으로 변경
+              padding: "10px",
+              transition: "border 0.3s",
+            }}
+          />
+          {isSubmitted && (
+            <ExampleBox>
+              <strong>예시 답안: </strong>
+              {short_answer_question.example_answers.join(", ")}
+            </ExampleBox>
+          )}
+        </Question>
+
+        {/* 생각 질문 */}
+        <Question style={FONT.md.medium}>
+          <h4>5. [생각해보기] {thinking_question.question}</h4>
+          <textarea
+            placeholder="자유롭게 생각을 적어보세요"
+            value={thinkingAnswer}
+            onChange={(e) => setThinkingAnswer(e.target.value)}
+            style={{
+              width: "100%",
+              minHeight: "80px",
+              borderRadius: "8px",
+              border: `2px solid ${isSubmitted ? "#9333ea" : "#ccc"}`, // 보라색으로 변경
+              padding: "10px",
+              transition: "border 0.3s",
+            }}
+          />
+          {isSubmitted && (
+            <ExampleBox>
+              <strong onClick={handleThinking}>✅ 예시 답안 보기</strong>
+              {/*<ul>
+                {thinking_question.example_answers.map((ans, idx) => (
+                  <li key={idx}>{ans}</li>
+                ))}
+              </ul>*/}
+            </ExampleBox>
+          )}
+        </Question>
       </PanelContent>
 
       {isSubmitted ? (
-        <SubmitButton onClick={handleRetry}>다시 풀기</SubmitButton>
+        <SubmitButton onClick={handleRetry}>
+          {/* 위에 disabled 추가하기*/}
+          채점완료
+        </SubmitButton>
       ) : (
         <SubmitButton onClick={handleSubmit}>채점하기</SubmitButton>
       )}
@@ -219,4 +306,21 @@ const Icon = styled.span`
   right: 10px;
   top: 55%;
   transform: translateY(-50%);
+`;
+const ExampleBox = styled.div`
+  margin-top: 8px;
+  padding: 10px;
+  background: ${({ theme }) => theme.color.gray10};
+  border-radius: 6px;
+  color: ${({ theme }) => theme.color.warning};
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  ul {
+    padding-left: 20px;
+  }
+  strong {
+    color: #888;
+  }
 `;
