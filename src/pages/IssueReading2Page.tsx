@@ -1,0 +1,646 @@
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import styled, { css, keyframes } from "styled-components";
+import QuizToggle from "../components/reading/QuizToggle";
+import QuizPanel from "../components/reading/QuizPanel";
+import DictionaryToggle from "../components/reading/DictionaryToggle";
+import DictionaryPanel from "../components/reading/DictionaryPanel";
+import QnaToggle from "../components/reading/QnaToggle";
+import QnaPanel from "../components/reading/QnaPanel";
+import FONT from "../styles/font";
+import { ReactComponent as Close } from "../assets/Close.svg";
+import { ReactComponent as Book } from "../assets/Book.svg";
+import { ReactComponent as UrlIcon } from "../assets/Url.svg";
+import { ReactComponent as UrlToggle } from "../assets/UrlToggle.svg";
+import { ReactComponent as GreenSearch } from "../assets/GreenSearch.svg";
+import { ReactComponent as Move } from "../assets/Move.svg";
+import { ReactComponent as RecommandIcon } from "../assets/RecommandIcon.svg";
+import { ReactComponent as Previous } from "../assets/Previous.svg";
+import { ReactComponent as Next } from "../assets/Next.svg";
+import { ReactComponent as Reward } from "../assets/Reward.svg";
+
+interface Data {
+  ai_result: AI_Result;
+  session_id: string;
+  level: string;
+  article_type: string;
+}
+interface AI_Result {
+  title: string;
+  article: string;
+  quiz: Quiz[];
+  short_answer_question: Short_Answer_Question;
+  thinking_question: Thinking_Question;
+  url: Url[];
+  summary: string;
+  words: Word[];
+  image: Image;
+}
+interface Quiz {
+  question: string;
+  options: string[];
+  correct_answer: number;
+}
+interface Short_Answer_Question {
+  example_answers: string[];
+  question: string;
+}
+interface Thinking_Question {
+  example_answers: string[];
+  question: string;
+}
+interface Url {
+  title: string;
+  url: string;
+}
+interface Word {
+  term: string;
+  explanation: string;
+}
+interface Image {
+  image_desc: string;
+  image_source: string;
+  image_url: string;
+}
+
+const IssueReading2Page = () => {
+  const location = useLocation();
+  const data = (location.state as { content: Data })?.content;
+  const ai_result = data.ai_result;
+  const sessionId = data.session_id;
+
+  // 우측 슬라이드 탭
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+  const [isDictOpen, setIsDictOpen] = useState(false);
+  const [isQnaOpen, setIsQnaOpen] = useState(false);
+  const isAnyOpen = isQuizOpen || isDictOpen || isQnaOpen;
+
+  const [isUrlOpen, setIsUrlOpen] = useState(false);
+
+  const [popupContent, setPopupContent] = useState<Word | null>(null);
+
+  const handleWordClick = (word: Word) => {
+    setPopupContent(word);
+  };
+
+  const closePopup = () => {
+    setPopupContent(null);
+  };
+
+  const highlightWords = (text: string, words: Word[]) => {
+    const terms = words.map((w) => w.term);
+    const pattern = new RegExp(`(${terms.join("|")})`, "g");
+
+    const parts = text.split(pattern);
+
+    return parts.map((part, i) => {
+      const wordMatch = words.find((w) => w.term === part);
+      if (wordMatch) {
+        return (
+          <HighlightedWord key={i} onClick={() => handleWordClick(wordMatch)}>
+            {part}
+          </HighlightedWord>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  // 퀴즈 리워드 모달창
+  const [isRewardOpen, setIsRewardOpen] = useState(false);
+  const handleRewardOpen = () => setIsRewardOpen(true);
+  const handleRewardClose = () => setIsRewardOpen(false);
+
+  // 퀴즈 생각해보기 예시답안 모달창
+  const [isThinkingOpen, setIsThinkingOpen] = useState(false);
+  const handleThinkingOpen = () => setIsThinkingOpen(true);
+  const handleThinkingClose = () => setIsThinkingOpen(false);
+
+  // 뒤로가기 추천창
+  const navigate = useNavigate();
+  const [isRecommandOpen, setIsRecommandOpen] = useState(false);
+  const handleRecommandClose = () => setIsRecommandOpen(false);
+
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      setIsRecommandOpen(true); // 모달 열기
+      // 👉 여기서 실제 페이지 이동은 막을 수 있음
+      navigate(1); // 뒤로가기 취소하고 현재 페이지 유지
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [navigate]);
+
+  // 뒤로가기 api 연결
+  const handleIssueClick = (issue: string) => {
+    navigate("/loading", { state: { keyword: issue } });
+  };
+
+  return (
+    <Container isQuizOpen={isQuizOpen}>
+      <ArticleBox isQuizOpen={isQuizOpen || isDictOpen}>
+        <Title style={FONT.xxl.bold}>{ai_result.title}</Title>
+        <ArticleUrl
+          style={FONT.xl.bold}
+          onClick={() => setIsUrlOpen((prev) => !prev)}
+        >
+          총 {ai_result.url.length}개의 기사를 요약했어요.{" "}
+          <UrlToggle
+            id="toggle"
+            style={{
+              transform: isUrlOpen ? "rotate(0deg)" : "rotate(-90deg)",
+              transition: "transform 0.3s ease",
+              cursor: "pointer",
+            }}
+          />
+        </ArticleUrl>
+
+        {isUrlOpen && (
+          <UrlBox style={FONT.md.bold}>
+            {ai_result.url.map((item, index) => (
+              <Url key={index}>
+                <UrlIcon id="icon" />
+                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                  {item.title}
+                </a>
+              </Url>
+            ))}
+          </UrlBox>
+        )}
+        <Line />
+        <Img>
+          <img src={ai_result.image.image_url} alt="기사 이미지" />
+          <Caption>
+            {ai_result.image.image_desc} <br />
+            출처: {ai_result.image.image_source}
+          </Caption>
+        </Img>
+        <Article>
+          {ai_result.article.split("\n\n").map((paragraph, i) => (
+            <p key={i}>
+              {highlightWords(paragraph, ai_result.words)}
+              <br />
+              <br />
+            </p>
+          ))}
+        </Article>
+        <Line />
+        <SummaryTitle style={FONT.xxl.bold}>
+          <span>
+            <Book />
+          </span>
+          {"  "}
+          AI 요약
+        </SummaryTitle>
+        <SummaryBox>
+          <Summary style={FONT.md.bold}>{ai_result.summary}</Summary>
+        </SummaryBox>
+      </ArticleBox>
+      <QuizToggle
+        isActive={isQuizOpen} // 색깔용
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(true);
+          setIsQnaOpen(false);
+          setIsDictOpen(false);
+        }}
+      />
+      <QnaToggle
+        isActive={isQnaOpen}
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(false);
+          setIsQnaOpen(true);
+          setIsDictOpen(false);
+        }}
+      />
+      <DictionaryToggle
+        isActive={isDictOpen} // 색깔용
+        isAnyOpen={isAnyOpen} // 밀림 효과용
+        onClick={() => {
+          setIsQuizOpen(false);
+          setIsQnaOpen(false);
+          setIsDictOpen(true);
+        }}
+      />
+
+      <QuizPanel
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+        quizList={ai_result.quiz}
+        short_answer_question={ai_result.short_answer_question}
+        thinking_question={ai_result.thinking_question}
+        onReward={handleRewardOpen} // 채점 완료 시 호출
+        onThinking={handleThinkingOpen} // 채점 완료 시 호출
+      />
+      <DictionaryPanel
+        isOpen={isDictOpen}
+        onClose={() => setIsDictOpen(false)}
+      />
+      <QnaPanel
+        isOpen={isQnaOpen}
+        onClose={() => setIsQnaOpen(false)}
+        sessionId={sessionId}
+      />
+      {popupContent && (
+        <PopupOverlay onClick={closePopup}>
+          <PopupBox onClick={(e) => e.stopPropagation()}>
+            <PopupTitle style={FONT.xl.bold}>
+              {popupContent.term}
+              <PopupAI style={FONT.sm.bold}>AI 용어 설명</PopupAI>
+            </PopupTitle>
+            <PopupText style={FONT.lg.bold}>
+              : {popupContent.explanation}
+            </PopupText>
+            <PopupClose onClick={closePopup}>
+              <Close />
+            </PopupClose>
+          </PopupBox>
+        </PopupOverlay>
+      )}
+      {isRewardOpen && (
+        <ModalOverlay onClick={handleRewardClose}>
+          <ModalBox onClick={(e) => e.stopPropagation()}>
+            <h2>🎉 축하합니다! 🎉</h2>
+            <p style={FONT.xxl.medium}> 5리워드를 획득했습니다!</p>
+            <Reward id="reward" />
+            <ModalButton onClick={handleRewardClose}>확인</ModalButton>
+          </ModalBox>
+        </ModalOverlay>
+      )}
+      {isThinkingOpen && (
+        <ModalOverlay onClick={handleThinkingClose}>
+          <ModalBox onClick={(e) => e.stopPropagation()}>
+            <RecommandIcon />
+            <p style={FONT.xxl.bold}>좋은 접근이에요! 👍</p>
+            <p style={FONT.xl.regular}>
+              혹시 다른 표현 방식이 궁금하다면
+              <br />
+              한번 살펴보면 좋을 것 같아요.
+            </p>
+            <p id="example" style={FONT.xl.semibold}>
+              📌 예시 답안
+            </p>
+            <ExampleBox>
+              <ul>
+                <li>
+                  우리나라는 대학과 기업, 연구소가 함께 협력해서 기술 개발을 더
+                  빠르게 해야 해요. 왜냐하면 혼자서 하는 것보다 함께 하면 더 큰
+                  힘을 낼 수 있어요. 어떤 사람은 '팀워크보다 돈이 더 중요해'라고
+                  할 수도 있는데, 연구자들이 함께 협력하면 효율도 높아져요.
+                </li>
+                <li>
+                  저는 정부가 이차전지 산업에 지원을 많이 해야 한다고 생각해요.
+                  예를 들어 연구비를 더 주거나 연구센터를 만들어주는 거예요.
+                  누군가는 '세금이 많이 들지 않을까?'라고 할 수도 있지만, 앞서
+                  나가려면 투자도 필요하다고 봐요.
+                </li>
+                <li>
+                  우리나라 회사들이 해외 기업과 협력하거나 지식을 교류하면 좋을
+                  것 같아요. 다른 나라의 좋은 기술을 배우고 우리 기술도 알려주는
+                  식이에요. 어떤 사람은 '우리끼리 하는 게 낫지 않아?' 할 수
+                  있지만, 세계랑 협력하면 새로운 아이디어가 생기고 더 발전할 수
+                  있어요.
+                </li>
+              </ul>
+            </ExampleBox>
+            <ModalButton onClick={handleThinkingClose}>닫기</ModalButton>
+          </ModalBox>
+        </ModalOverlay>
+      )}
+      {isRecommandOpen && (
+        <ModalOverlay onClick={handleRecommandClose}>
+          <ModalBox onClick={(e) => e.stopPropagation()}>
+            <RecommandIcon />
+            <p style={FONT.xxl.bold}>잠깐! 혹시 놓치고 가는 뉴스는 없나요?</p>
+            <p style={FONT.xl.regular}>
+              🎯 당신에게 딱 맞는 뉴스 주제를 골라봤어요.
+            </p>
+
+            <IssueList>
+              <IssueItem
+                onClick={() =>
+                  handleIssueClick(
+                    "한국 의학계, 신약 개발 및 치료기술 혁신 속도"
+                  )
+                }
+              >
+                <GreenSearch width={18} height={18} />
+                한국 의학계, 신약 개발 및 치료기술 혁신 속도
+                <Move id="move" />
+              </IssueItem>
+              <IssueItem
+                onClick={() =>
+                  handleIssueClick(
+                    "음식점과 가정에서 음식물 쓰레기 처리에 대한 이해와 해결책"
+                  )
+                }
+              >
+                <GreenSearch width={18} height={18} />
+                음식점과 가정에서 음식물 쓰레기 처리에 대한 이해와 해결책
+                <Move id="move" />
+              </IssueItem>
+              <IssueItem
+                onClick={() =>
+                  handleIssueClick(
+                    "한국 의학계, 신약 개발 및 치료기술 혁신 속도"
+                  )
+                }
+              >
+                <GreenSearch width={18} height={18} />
+                한국 의학계, 신약 개발 및 치료기술 혁신 속도
+                <Move id="move" />
+              </IssueItem>
+              <IssueItem
+                onClick={() =>
+                  handleIssueClick(
+                    "몽골 화석에서 티라노사우루스의 새 종 및 진화 과정 증거 발견"
+                  )
+                }
+              >
+                <GreenSearch width={18} height={18} />
+                몽골 화석에서 티라노사우루스의 새 종 및 진화 과정 증거 발견
+                <Move id="move" />
+              </IssueItem>
+            </IssueList>
+            <ModalButton onClick={() => navigate("/")}>괜찮아요</ModalButton>
+          </ModalBox>
+        </ModalOverlay>
+      )}
+    </Container>
+  );
+};
+
+export default IssueReading2Page;
+
+const Container = styled.div<{ isQuizOpen: boolean }>`
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+`;
+const Title = styled.div`
+  color: ${({ theme }) => theme.color.gray80};
+  font-weight: 600;
+  margin-bottom: 10px;
+`;
+const ArticleUrl = styled.div`
+  cursor: pointer;
+  color: ${({ theme }) => theme.color.gray40};
+  #toggle {
+    vertical-align: middle;
+  }
+`;
+const UrlBox = styled.div`
+  cursor: pointer;
+`;
+const Url = styled.div`
+  width: fit-content;
+  background-color: ${({ theme }) => theme.color.gray05};
+  border-radius: 30px;
+  padding: 5px 15px;
+  margin: 10px 0px;
+  color: ${({ theme }) => theme.color.gray40};
+
+  #icon {
+    //margin-top: 10px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: ${({ theme }) => theme.color.primary70};
+      text-decoration: underline;
+    }
+  }
+`;
+const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
+  width: 800px;
+  margin: 50px auto;
+  text-align: left;
+  transition: transform 0.3s ease;
+  transform: ${({ isQuizOpen }) =>
+    isQuizOpen ? `translateX(-100px)` : "translateX(0)"};
+`;
+const Img = styled.div`
+  width: 800px;
+  height: 400px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+
+  img {
+    width: 800px;
+    height: 400px;
+    border-radius: 12px;
+    object-fit: cover;
+    //object-position: top;
+  }
+`;
+const Caption = styled.div`
+  margin: 6px;
+  font-size: 12px;
+  color: ${({ theme }) => theme.color.gray40};
+  text-align: left;
+`;
+const Article = styled.div`
+  color: ${({ theme }) => theme.color.gray80};
+  line-height: 160%;
+  margin: 50px 0;
+`;
+const Line = styled.div`
+  height: 1px;
+  margin: 20px 0;
+  border: 1px solid ${({ theme }) => theme.color.gray10};
+`;
+const SummaryTitle = styled.div`
+  color: ${({ theme }) => theme.color.primary70};
+  display: flex;
+  align-items: center;
+  span {
+    transform: translateY(10%);
+    margin-right: 10px;
+  }
+`;
+const SummaryBox = styled.div`
+  width: 800px;
+  border-radius: 20px;
+  margin: 20px 0;
+  margin-bottom: 100px;
+  padding: 30px 20px;
+  background-color: ${({ theme }) => theme.color.gray05};
+`;
+const Summary = styled.div`
+  color: ${({ theme }) => theme.color.gray80};
+`;
+
+const HighlightedWord = styled.span`
+  background-color: ${({ theme }) => theme.color.primary10}; // 원하는 색
+  color: ${({ theme }) => theme.color.primary70};
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0 4px;
+  transition: background 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.color.primary20};
+  }
+`;
+const PopupOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+`;
+
+const PopupBox = styled.div`
+  position: relative;
+  background: white;
+  padding: 24px;
+  border-radius: 20px;
+  max-width: 360px;
+  width: 80%;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+`;
+
+const PopupTitle = styled.div`
+  display: flex;
+  align-items: baseline; /* 아래줄 맞춤 */
+  margin-bottom: 12px;
+  color: ${({ theme }) => theme.color.primary70};
+`;
+const PopupAI = styled.span`
+  margin-left: 5px;
+  color: ${({ theme }) => theme.color.gray30};
+`;
+const PopupText = styled.div`
+  color: ${({ theme }) => theme.color.gray50};
+`;
+
+const PopupClose = styled.div`
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  cursor: pointer;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+`;
+
+const ModalBox = styled.div`
+  width: 600px;
+  background: white;
+  padding: 20px;
+  border-radius: 20px;
+  text-align: center;
+  border: solid 4px #129f5d;
+  p {
+    margin: 5px 0;
+  }
+  #reward {
+    margin-top: 10px;
+  }
+  #example {
+    text-align: left;
+    color: ${({ theme }) => theme.color.gray60};
+  }
+`;
+const ModalButton = styled.button`
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  background-color: ${({ theme }) => theme.color.gray20};
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 20px;
+  border: none;
+  transition: background 0.2s ease;
+  &:hover {
+    background-color: ${({ theme }) => theme.color.primary70};
+  }
+`;
+
+const IssueList = styled.div`
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
+const IssueItem = styled.div`
+  background-color: #f5f5f7;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: left;
+  color: #333;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin: 2px 0px;
+  position: relative;
+
+  #move {
+    position: absolute;
+    right: 10px;
+  }
+  &:hover {
+    background-color: #eaeaec;
+  }
+`;
+
+const ExampleBox = styled.div`
+  background-color: #f5f5f7;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-align: left;
+  color: #333;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin: 2px 0px;
+  position: relative;
+
+  #move {
+    position: absolute;
+    right: 10px;
+  }
+  ul {
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 12px; /* 항목 사이 간격 */
+  }
+`;
