@@ -32,19 +32,24 @@ const IssueLoadingPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // 기사 생성 api 연동
+  // 기사 생성 테스트용
+  /*
   useEffect(() => {
     const fetchData = async () => {
       if (!keyword.trim()) return; // 아무것도 입력안할때
-
       try {
         // 테스트용
-        const response = await getArticle(keyword, "GENERAL", "LEVEL1", false); // 레벨 설정
-        //const response = await getArticle("네이버", "GENERAL", "LEVEL2", true); // 레벨 설정
+        // 1. 새싹 스크립트
+        const response = await getArticle(keyword, "SCRIPT", "LEVEL1", false);
+        // 2. 새싹 일반
+        //const response = await getArticle(keyword, "GENERAL", "LEVEL1", false);
+        // 3. 꽃 일반
+        //const response = await getArticle(keyword, "GENERAL", "LEVEL2", false);
         console.log("기사 생성:", response.data);
         setData(response.data);
-
-        navigate("/reading", {
+        navigate("/reading1/script", {
+          //navigate("/reading1/general",  {
+          //navigate("/reading2", {
           state: { content: response.data },
         });
       } catch (error) {
@@ -53,6 +58,53 @@ const IssueLoadingPage: React.FC = () => {
     };
     fetchData();
   }, []);
+*/
+
+  useEffect(() => {
+    if (!keyword?.trim()) return;
+
+    const fetchData = async () => {
+      const storedLevel = parseInt(
+        localStorage.getItem("user_level") || "1",
+        10
+      );
+
+      let levelParam: "LEVEL1" | "LEVEL2" = "LEVEL1";
+      let articleType: "SCRIPT" | "GENERAL" = "SCRIPT";
+      let url: string = "/reading1/script";
+
+      if (storedLevel === 1) {
+        levelParam = "LEVEL1";
+        articleType = "SCRIPT";
+        url = "/reading1/script";
+      } else if (storedLevel === 2) {
+        levelParam = "LEVEL1";
+        articleType = "GENERAL";
+        url = "/reading1/general";
+      } else if (storedLevel === 3) {
+        levelParam = "LEVEL2";
+        articleType = "GENERAL";
+        url = "/reading2";
+      }
+
+      try {
+        const response = await getArticle(
+          keyword,
+          articleType,
+          levelParam,
+          false
+        );
+        console.log("기사 생성:", response.data);
+        setData(response.data);
+
+        navigate(url, { state: { content: response.data } });
+      } catch (error) {
+        console.error("기사 생성 오류", error);
+      }
+    };
+
+    fetchData();
+  }, [keyword]); // keyword 바뀔 때마다 실행
 
   return (
     <Wrapper>
