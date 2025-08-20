@@ -51,13 +51,13 @@ const Sidebar: React.FC = () => {
         <Home />
         <span style={FONT.md.medium}>홈</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/dictionary")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/vocabulary")}>
         <Dic />
         <span style={FONT.md.medium}>단어장</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/newsmemory")}>
+      <MenuItem isOpen={isOpen} onClick={() => navigate("/ranking")}>
         <Memory />
-        <span style={FONT.md.medium}>나의 뉴스 메모리</span>
+        <span style={FONT.md.medium}>우리 학교 랭킹</span>
       </MenuItem>
       <MenuItem isOpen={isOpen} onClick={() => navigate("/mypage")}>
         <MyPage />
