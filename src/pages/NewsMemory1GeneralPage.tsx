@@ -23,7 +23,15 @@ import { ReactComponent as Next } from "../assets/Next.svg";
 import { getArticle } from "../api/Reading";
 import NewsMemoryLoadingPage from "./NewsMemoryLoading";
 
-interface Data {
+interface MemoryState {
+  year: number;
+  month: number;
+  date: number;
+  articleId: number;
+  title: string;
+}
+
+interface MemoryData {
   ai_result: AI_Result;
   session_id: string;
   level: string;
@@ -67,36 +75,35 @@ interface Image {
   image_url: string;
 }
 const NewsMemory1GeneralPage = () => {
-  const [data, setData] = useState<Data | null>(null);
+  const location = useLocation();
+
+  const locationState = location.state as {
+    memoryState?: MemoryState;
+    memoryData?: MemoryData;
+  };
+  const [memoryState, setMemoryState] = useState<MemoryState | null>(
+    locationState?.memoryState || null
+  );
+  const [memoryData, setMemoryData] = useState<MemoryData | null>(
+    locationState?.memoryData || null
+  );
+
+  // 뉴스메모리 읽은 날짜
+  const formattedDate = memoryState
+    ? `${memoryState.year}년 ${memoryState.month}월 ${memoryState.date}일`
+    : "";
+
   const [isUrlOpen, setIsUrlOpen] = useState(false);
   const [popupContent, setPopupContent] = useState<Word | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getArticle(
-          "이차전지",
-          "GENERAL",
-          "LEVEL1",
-          true
-        );
-        console.log("기사 생성:", response.data);
-        setData(response.data);
-      } catch (error) {
-        console.error("기사 생성 오류", error);
-      }
-    };
-    fetchData();
-  }, []);
-
   // data가 없으면 로딩 반환
-  if (!data) {
+  if (!memoryData) {
     return <NewsMemoryLoadingPage />;
   }
 
-  const ai_result = data.ai_result;
-  const sessionId = data.session_id;
+  const ai_result = memoryData.ai_result;
+  const sessionId = memoryData.session_id;
 
   const paragraphs = [...ai_result.article.split("\n\n"), ai_result.summary];
   const totalPages = paragraphs.length;
@@ -129,6 +136,10 @@ const NewsMemory1GeneralPage = () => {
   return (
     <Container>
       <ArticleBox>
+        <Header>
+          <HeaderTitle style={FONT.xl.bold}>뉴스메모리</HeaderTitle>
+          {formattedDate && <HeaderDate>{formattedDate}</HeaderDate>}
+        </Header>
         <Title style={FONT.xxl.bold}>{ai_result.title}</Title>
 
         <ArticleUrl
@@ -243,6 +254,23 @@ const Container = styled.div`
   height: 100vh;
   position: relative;
   overflow-x: hidden;
+`;
+const Header = styled.div`
+  width: 800px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const HeaderTitle = styled.div`
+  color: ${({ theme }) => theme.color.gray40};
+`;
+
+const HeaderDate = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.gray40};
 `;
 const Title = styled.div`
   color: ${({ theme }) => theme.color.gray80};

@@ -22,8 +22,17 @@ import { ReactComponent as Previous } from "../assets/Previous.svg";
 import { ReactComponent as Next } from "../assets/Next.svg";
 import { getArticle } from "../api/Reading";
 import NewsMemoryLoadingPage from "./NewsMemoryLoading";
+import { getArticleMemory, getArticleMemoryDetail } from "../api/Memory";
 
-interface Data {
+interface MemoryState {
+  year: number;
+  month: number;
+  date: number;
+  articleId: number;
+  title: string;
+}
+
+interface MemoryData {
   ai_result: AI_Result;
   session_id: string;
   level: string;
@@ -73,40 +82,36 @@ interface Image {
 
 const NewsMemory1ScriptPage = () => {
   const location = useLocation();
-  const [data, setData] = useState<Data | null>(null);
 
-  // 우측 슬라이드 탭
-  const [isQuizOpen, setIsQuizOpen] = useState(false);
-  const [isDictOpen, setIsDictOpen] = useState(false);
-  const [isQnaOpen, setIsQnaOpen] = useState(false);
-  const isAnyOpen = isQuizOpen || isDictOpen || isQnaOpen;
+  const locationState = location.state as {
+    memoryState?: MemoryState;
+    memoryData?: MemoryData;
+  };
+
+  const [memoryState, setMemoryState] = useState<MemoryState | null>(
+    locationState?.memoryState || null
+  );
+  const [memoryData, setMemoryData] = useState<MemoryData | null>(
+    locationState?.memoryData || null
+  );
+
+  // 뉴스메모리 읽은 날짜
+  const formattedDate = memoryState
+    ? `${memoryState.year}년 ${memoryState.month}월 ${memoryState.date}일`
+    : "";
 
   const [isUrlOpen, setIsUrlOpen] = useState(false);
-
   const [popupContent, setPopupContent] = useState<Word | null>(null);
-
   const [currentPage, setCurrentPage] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await getArticle("이차전지", "SCRIPT", "LEVEL1", true);
-        console.log("기사 생성:", response.data);
-        setData(response.data);
-      } catch (error) {
-        console.error("기사 생성 오류", error);
-      }
-    };
-    fetchData();
-  }, []);
-
   // data가 없으면 로딩 반환
-  if (!data) {
+  if (!memoryData) {
     return <NewsMemoryLoadingPage />;
   }
 
-  const ai_result = data.ai_result;
-  const sessionId = data.session_id;
+  const ai_result = memoryData.ai_result;
+  const sessionId = memoryData.session_id;
+
   const chatPairs = [];
   for (let i = 0; i < ai_result.article.length; i += 2) {
     chatPairs.push(ai_result.article.slice(i, i + 2));
@@ -141,8 +146,12 @@ const NewsMemory1ScriptPage = () => {
   };
 
   return (
-    <Container isQuizOpen={isQuizOpen}>
-      <ArticleBox isQuizOpen={isQuizOpen || isDictOpen}>
+    <Container>
+      <ArticleBox>
+        <Header>
+          <HeaderTitle style={FONT.xl.bold}>뉴스메모리</HeaderTitle>
+          {formattedDate && <HeaderDate>{formattedDate}</HeaderDate>}
+        </Header>
         <Title style={FONT.xxl.bold}>{ai_result.title}</Title>
         <ArticleUrl
           style={FONT.xl.bold}
@@ -258,11 +267,29 @@ const NewsMemory1ScriptPage = () => {
 
 export default NewsMemory1ScriptPage;
 
-const Container = styled.div<{ isQuizOpen: boolean }>`
+const Container = styled.div`
   width: 100vw;
   height: 100vh;
   position: relative;
   overflow-x: hidden;
+`;
+
+const Header = styled.div`
+  width: 800px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const HeaderTitle = styled.div`
+  color: ${({ theme }) => theme.color.gray40};
+`;
+
+const HeaderDate = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.color.gray40};
 `;
 const Title = styled.div`
   color: ${({ theme }) => theme.color.gray80};
@@ -328,13 +355,11 @@ const Line = styled.div`
   margin: 20px 0;
   border: 1px solid ${({ theme }) => theme.color.gray10};
 `;
-const ArticleBox = styled.div<{ isQuizOpen: boolean }>`
+const ArticleBox = styled.div`
   width: 800px;
   margin: 50px auto;
   text-align: left;
   transition: transform 0.3s ease;
-  transform: ${({ isQuizOpen }) =>
-    isQuizOpen ? `translateX(-100px)` : "translateX(0)"};
 `;
 const Article = styled.div`
   color: ${({ theme }) => theme.color.gray80};
@@ -431,7 +456,7 @@ const Pagination = styled.div`
     text-align: center; // 가운데 정렬
   }
 `;
-const PageButton = styled.button<{ disabled?: boolean }>`
+const PageButton = styled.button`
   border: none;
   background: none;
   font-size: 18px;
@@ -499,110 +524,4 @@ const PopupClose = styled.div`
   right: 15px;
   top: 15px;
   cursor: pointer;
-`;
-const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 3000;
-`;
-
-const ModalBox = styled.div`
-  width: 600px;
-  background: white;
-  padding: 20px;
-  border-radius: 20px;
-  text-align: center;
-  border: solid 4px #129f5d;
-  p {
-    margin: 5px 0;
-  }
-  #reward {
-    margin-top: 10px;
-  }
-  #example {
-    text-align: left;
-    color: ${({ theme }) => theme.color.gray60};
-  }
-`;
-const ModalButton = styled.button`
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 600;
-  background-color: ${({ theme }) => theme.color.gray20};
-  color: #fff;
-  border-radius: 12px;
-  cursor: pointer;
-  margin-top: 20px;
-  border: none;
-  transition: background 0.2s ease;
-  &:hover {
-    background-color: ${({ theme }) => theme.color.primary70};
-  }
-`;
-
-const IssueList = styled.div`
-  margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-`;
-
-const IssueItem = styled.div`
-  background-color: #f5f5f7;
-  padding: 12px 16px;
-  border-radius: 12px;
-  text-align: left;
-  color: #333;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  margin: 2px 0px;
-  position: relative;
-
-  #move {
-    position: absolute;
-    right: 10px;
-  }
-  &:hover {
-    background-color: #eaeaec;
-  }
-`;
-
-const ExampleBox = styled.div`
-  background-color: #f5f5f7;
-  padding: 12px 16px;
-  border-radius: 12px;
-  text-align: left;
-  color: #333;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  margin: 2px 0px;
-  position: relative;
-
-  #move {
-    position: absolute;
-    right: 10px;
-  }
-  ul {
-    padding-left: 20px;
-  }
-  li {
-    margin-bottom: 12px; /* 항목 사이 간격 */
-  }
 `;
