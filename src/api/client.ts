@@ -1,4 +1,4 @@
-const baseURL = "http://localhost";
+const baseURL = process.env.REACT_APP_BASE_URL;
 
 const baseHeaders = {
   "Content-Type": "application/json",
