@@ -1,26 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import FONT from "../styles/font";
-import { useNavigate } from "react-router-dom";
+import { getDictionaryList, deleteDictionary } from "../api/Dictionary";
 
 interface WordItem {
   term: string;
   meaning: string;
   type: string;
+  link?: string;
+  targetCode: string;
 }
 
-const mockWords: WordItem[] = [
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-];
-
 const VocabularyPage: React.FC = () => {
-  const [words, setWords] = useState<WordItem[]>(mockWords);
+  const [words, setWords] = useState<WordItem[]>([]);
 
-  const handleDelete = (index: number) => {
-    setWords(words.filter((_, i) => i !== index));
+  useEffect(() => {
+    const fetchWords = async () => {
+      try {
+        const res = await getDictionaryList();
+        if (res.isSuccess) {
+          const wordList: WordItem[] = res.data.results.map((item: any) => ({
+            term: item.word,
+            meaning: item.definition,
+            type: item.pos,
+            link: item.link,
+            targetCode: item.targetCode,
+          }));
+          setWords(wordList);
+        }
+      } catch (err) {
+        console.error("단어장 불러오기 실패:", err);
+      }
+    };
+    fetchWords();
+  }, []);
+
+  const handleDelete = async (index: number) => {
+    const word = words[index];
+    try {
+      const res = await deleteDictionary(word.targetCode);
+      if (res.isSuccess) {
+        // 삭제 성공 시
+        setWords(words.filter((_, i) => i !== index));
+      }
+    } catch (err) {
+      console.error("단어 삭제 실패:", err);
+    }
   };
+
   return (
     <PageWrapper>
       <Title style={FONT.xxxl.bold}>내 단어장</Title>
@@ -30,7 +57,6 @@ const VocabularyPage: React.FC = () => {
             <WordCard key={i}>
               <WordMain>
                 <WordTerm style={FONT.xl.bold}>{word.term}</WordTerm>
-                <WordHanja style={FONT.lg.medium}> 增加하다</WordHanja>
                 <br />
                 <WordType style={FONT.md.semibold}>{word.type}</WordType>
                 <WordMeaning style={FONT.lg.medium}>
@@ -53,7 +79,6 @@ const PageWrapper = styled.div`
   padding: 60px 0;
   text-align: center;
 `;
-
 const Title = styled.h2`
   text-align: center;
   margin-bottom: 32px;
@@ -68,13 +93,11 @@ const WordSection = styled.div`
   overflow-y: auto;
   background-color: ${({ theme }) => theme.color.gray05};
 `;
-
 const WordList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
 `;
-
 const WordCard = styled.div`
   text-align: left;
   background: #fff;
@@ -82,29 +105,21 @@ const WordCard = styled.div`
   border-radius: 12px;
   position: relative;
 `;
-
 const WordMain = styled.div``;
-
 const WordTerm = styled.span`
   color: ${({ theme }) => theme.color.primary70};
-`;
-const WordHanja = styled.span`
-  color: ${({ theme }) => theme.color.gray30};
 `;
 const WordMeaning = styled.span`
   color: #666;
 `;
-
 const WordType = styled.span`
   font-size: 12px;
   color: ${({ theme }) => theme.color.primary70};
   background-color: ${({ theme }) => theme.color.primary10};
   border-radius: 6px;
   padding: 3px 7px;
-
   margin-top: 4px;
 `;
-
 const DeleteButton = styled.button`
   padding: 3px 7px;
   border-radius: 6px;
