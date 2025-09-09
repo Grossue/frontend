@@ -5,6 +5,8 @@ import FONT from "../../styles/font";
 import { ReactComponent as Close } from "../../assets/Close.svg";
 import { ReactComponent as CorrectIcon } from "../../assets/O.svg";
 import { ReactComponent as WrongIcon } from "../../assets/X.svg";
+import { putArticleReward } from "../../api/Reading";
+import { useUser } from "../../context/UserContext";
 
 interface Quiz {
   question: string;
@@ -25,8 +27,9 @@ interface QuizPanelProps {
   quizList: Quiz[];
   short_answer_question: Short_Answer_Question;
   thinking_question: Thinking_Question;
-  onReward?: () => void;
+  onReward?: (rewardCnt: number) => void;
   onThinking?: () => void;
+  onThinkingFeedback?: (answer: string) => void; // 생각해보기 피드백
 }
 
 const QuizPanel: React.FC<QuizPanelProps> = ({
@@ -37,6 +40,7 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
   thinking_question,
   onReward,
   onThinking,
+  onThinkingFeedback,
 }) => {
   const theme = useTheme();
 
@@ -57,9 +61,33 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
     }
   };
 
-  const handleSubmit = () => {
+  const { refreshUser } = useUser();
+
+  const handleSubmit = async () => {
     setIsSubmitted(true);
-    if (onReward) onReward(); // 채점 후 모달 호출
+
+    // 객관식 정답 개수 계산
+    const correctCnt = quizList.reduce((acc, quiz, index) => {
+      return acc + (selectedAnswers[index] === quiz.correct_answer ? 1 : 0);
+    }, 0);
+    const totalCnt = quizList.length;
+
+    // 리워드 API 연동
+    try {
+      const res = await putArticleReward(correctCnt, totalCnt);
+      const rewardCnt = res.data;
+
+      if (onReward) onReward(rewardCnt);
+      refreshUser(); // Sidebar 자동 업데이트
+      console.log("리워드 지급 완료", rewardCnt);
+    } catch (error) {
+      console.error("리워드 지급 실패", error);
+    }
+
+    // 생각해보기 피드백 API 요청
+    if (onThinkingFeedback && thinkingAnswer.trim()) {
+      onThinkingFeedback(thinkingAnswer.trim());
+    }
   };
 
   const handleRetry = () => {
@@ -132,7 +160,7 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
         <Question style={FONT.md.medium}>
           <h4>4. [단답형] {short_answer_question.question}</h4>
           <textarea
-            placeholder="여기에 답을 입력하세요"
+            placeholder="여기에 답을 입력하세요."
             value={shortAnswer}
             onChange={(e) => setShortAnswer(e.target.value)}
             style={{
@@ -142,6 +170,8 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
               border: `2px solid ${isSubmitted ? "#9333ea" : "#ccc"}`, // 보라색으로 변경
               padding: "10px",
               transition: "border 0.3s",
+              color: `${isSubmitted ? "#9333ea" : "#000"}`,
+              fontFamily: "Pretendard",
             }}
           />
           {isSubmitted && (
@@ -156,7 +186,7 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
         <Question style={FONT.md.medium}>
           <h4>5. [생각해보기] {thinking_question.question}</h4>
           <textarea
-            placeholder="자유롭게 생각을 적어보세요"
+            placeholder="자유롭게 생각을 적어보세요."
             value={thinkingAnswer}
             onChange={(e) => setThinkingAnswer(e.target.value)}
             style={{
@@ -166,6 +196,8 @@ const QuizPanel: React.FC<QuizPanelProps> = ({
               border: `2px solid ${isSubmitted ? "#9333ea" : "#ccc"}`, // 보라색으로 변경
               padding: "10px",
               transition: "border 0.3s",
+              color: `${isSubmitted ? "#9333ea" : "#000"}`,
+              fontFamily: "Pretendard",
             }}
           />
           {isSubmitted && (

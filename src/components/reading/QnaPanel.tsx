@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import styled from "styled-components";
 import FONT from "../../styles/font";
 import { ReactComponent as Close } from "../../assets/Close.svg";
@@ -95,7 +96,9 @@ const QnaPanel: React.FC<QnaPanelProps> = ({ isOpen, onClose, sessionId }) => {
                   <BotIconBox>
                     <BotIcon />
                   </BotIconBox>
-                  <BotMessage style={FONT.sm.medium}>{item.answer}</BotMessage>
+                  <BotMessage style={FONT.sm.medium}>
+                    <ReactMarkdown>{item.answer}</ReactMarkdown>
+                  </BotMessage>
                 </BotBubble>
               </BotRow>
             )}
@@ -190,6 +193,11 @@ const BotMessage = styled.div`
   border-radius: 10px;
   max-width: 250px;
   text-align: left;
+  white-space: pre-wrap; // 줄바꿈 반영
+
+  ul {
+    padding-left: 15px; /* 기본 들여쓰기 제거 */
+  }
 `;
 
 const UserRow = styled.div`
