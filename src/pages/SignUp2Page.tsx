@@ -14,6 +14,9 @@ const SignUp2Page = () => {
   const isNextEnabled =
     isValidPassword(password) && password === confirmPassword;
 
+  const showMismatchError =
+    confirmPassword.length > 0 && password !== confirmPassword;
+
   return (
     <Wrapper>
       <StepIndicator>
@@ -43,9 +46,12 @@ const SignUp2Page = () => {
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
       />
+      {showMismatchError && (
+        <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
+      )}
 
       <NextButton
-        //disabled={!isNextEnabled}
+        disabled={!isNextEnabled}
         onClick={() => navigate("/signup3", { state: { email, password } })}
       >
         다음
@@ -55,6 +61,8 @@ const SignUp2Page = () => {
 };
 
 export default SignUp2Page;
+
+/* styled-components */
 
 const Wrapper = styled.div`
   max-width: 600px;
@@ -129,7 +137,15 @@ const Input = styled.input`
     color: #ccc;
   }
 `;
-const NextButton = styled.button`
+
+const ErrorMessage = styled.p`
+  font-size: 12px;
+  color: red;
+  margin: -8px 0 12px; /* 입력칸과 간격 조정 */
+  text-align: left;
+`;
+
+const NextButton = styled.button<{ disabled?: boolean }>`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -140,21 +156,7 @@ const NextButton = styled.button`
   font-weight: 500;
   border: none;
   border-radius: 10px;
-  background: #1aa344;
+  background: ${({ disabled }) => (disabled ? "#ccc" : "#1aa344")};
   color: #fff;
-  cursor: "pointer";
-`;
-/*
-const NextButton = styled.button<{ disabled: boolean }>`
-  width: 100%;
-  margin-top: 40px;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 10px;
-  background: ${({ disabled }) => (disabled ? "#f3f3f3" : "#1aa344")};
-  color: ${({ disabled }) => (disabled ? "#999" : "#fff")};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
-*/
