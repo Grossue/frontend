@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
+import {
+  useNavigate,
+  useParams,
+  useSearchParams,
+  useLocation,
+} from "react-router-dom";
 import styled, { keyframes } from "styled-components";
-import { useLocation, useNavigate } from "react-router-dom";
 import FONT from "../styles/font";
-import { getArticle } from "../api/Reading";
+import { getArticleMemoryDetail } from "../api/Memory";
 
 const loadingMessages = [
   "관련 기사를 검색하고 있어요 🔍 \n당신을 위한 맞춤형 정보를 찾는 중이에요.",
@@ -12,25 +17,64 @@ const loadingMessages = [
   "우리 개발자들이 땀 흘리며 데이터 긁어오는 중…😅",
 ];
 
-interface Data {
-  ai_result: [];
-  session_id: string;
-}
-
 const NewsMemoryLoadingPage: React.FC = () => {
   const [index, setIndex] = useState(0);
-  const location = useLocation();
   const navigate = useNavigate();
-  const keyword = (location.state as { keyword: string })?.keyword;
-  const [data, setData] = useState<Data[]>([]); // data
+  const location = useLocation();
 
+  // state 저장
+  const state = location.state as {
+    articleId: number;
+    year: number;
+    month: number;
+    date: number;
+    title: string;
+  };
+
+  // 로딩 메시지 슬라이드
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
+
+  // 뉴스메모리 상세 API 호출 후 level/type에 따라 라우팅
+  useEffect(() => {
+    if (!state) return;
+
+    const fetchArticle = async () => {
+      try {
+        const res = await getArticleMemoryDetail(state?.articleId);
+        if (res.isSuccess && res.data) {
+          const { level: apiLevel, article_type } = res.data;
+
+          if (apiLevel === "LEVEL1" && article_type === "SCRIPT") {
+            navigate(
+              `/newsmemory1/script/${state?.year}/${state?.month}/${state?.date}/${state?.articleId}`,
+              { state: { memoryState: state, memoryData: res.data } }
+            );
+          } else if (apiLevel === "LEVEL1" && article_type === "GENERAL") {
+            navigate(
+              `/newsmemory1/general/${state?.year}/${state?.month}/${state?.date}/${state?.articleId}`,
+              { state: { memoryState: state, memoryData: res.data } }
+            );
+          } else if (apiLevel === "LEVEL2" && article_type === "GENERAL") {
+            navigate(
+              `/newsmemory2/${state?.year}/${state?.month}/${state?.date}/${state?.articleId}`,
+              { state: { memoryState: state, memoryData: res.data } }
+            );
+          } else {
+            console.warn("알 수 없는 레벨/타입 조합:", apiLevel, article_type);
+          }
+        }
+      } catch (err) {
+        console.error("뉴스메모리 상세 API 실패:", err);
+      }
+    };
+
+    fetchArticle();
+  }, [state?.articleId, navigate, state?.year, state?.month, state?.date]);
 
   return (
     <Wrapper>
@@ -40,7 +84,7 @@ const NewsMemoryLoadingPage: React.FC = () => {
         <Dot delay="0.4s" color="#0fa958" />
       </Dots>
       <TextMain style={FONT.xxl.bold}>뉴스메모리 글을 가져오고 있어요</TextMain>
-      <TextSub style={FONT.xl.bold}>{keyword}</TextSub>
+      <TextSub style={FONT.xl.bold}>{state?.title}</TextSub>
       <Sub style={FONT.xxl.bold}>
         {loadingMessages[index].split("\n").map((line, i) => (
           <span key={i}>
@@ -54,6 +98,7 @@ const NewsMemoryLoadingPage: React.FC = () => {
 };
 
 export default NewsMemoryLoadingPage;
+
 const bounce = keyframes`
   0%, 80%, 100% {
     transform: scale(0.8);
