@@ -10,23 +10,33 @@ import { ReactComponent as MyPage } from "../../assets/MyPage.svg";
 import { ReactComponent as Logout } from "../../assets/Logout.svg";
 import { ReactComponent as Logo } from "../../assets/GrossueLogo.svg";
 import FONT from "../../styles/font";
+import { useUser } from "../../context/UserContext";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [isLogIn, setIsLogIn] = useState<boolean>(
-    !!localStorage.getItem("accessToken")
-  );
-
   const navigate = useNavigate();
+
+  const { user, refreshUser } = useUser();
+  const isLogIn = !!localStorage.getItem("accessToken");
 
   const handleAuthClick = () => {
     if (isLogIn) {
       localStorage.removeItem("accessToken");
-      setIsLogIn(false);
+      refreshUser(); // 로그아웃 후 Context 갱신
       navigate("/login");
     } else {
       navigate("/login");
     }
+  };
+
+  // 레벨 라벨 + 아이콘
+  const levelInfo: Record<
+    string,
+    { label: string; icon: string; color: string }
+  > = {
+    LEVEL1: { label: "새싹", icon: "🌱", color: "#4CAF50" },
+    LEVEL2: { label: "새싹", icon: "🌿", color: "#2E8B57" },
+    LEVEL3: { label: "꽃", icon: "🌸", color: "#F92C5C" },
   };
 
   return (
@@ -39,11 +49,19 @@ const Sidebar: React.FC = () => {
         <img src="/grossueLogo.png" alt="프로필 사진" />
         <div>
           <span id="name" style={FONT.lg.bold}>
-            김구름
+            {user ? user.nickname : "게스트"}
           </span>
-          <span id="level" style={FONT.md.medium}>
-            새싹 * 0점
-          </span>
+          {user && (
+            <span
+              style={{
+                ...FONT.md.medium,
+                color: levelInfo[user.level]?.color || "#888",
+              }}
+            >
+              {levelInfo[user.level]?.icon} {levelInfo[user.level]?.label}
+              <span id="level"> · {user.reward}점</span>
+            </span>
+          )}
         </div>
       </Profile>
 
@@ -90,7 +108,7 @@ const Container = styled.div<{ isOpen: boolean }>`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 16px 16px;
+  padding: 16px;
   border-right: 1px solid ${({ theme }) => theme.color.gray10};
 `;
 
@@ -129,6 +147,7 @@ const Profile = styled.div<{ isOpen: boolean }>`
 
   #name {
     color: ${({ theme }) => theme.color.gray80};
+    text-align: left;
   }
   #level {
     color: ${({ theme }) => theme.color.gray40};
@@ -147,7 +166,6 @@ const Profile = styled.div<{ isOpen: boolean }>`
 `;
 
 const MenuItem = styled.div<{ isOpen: boolean }>`
-  z-index: 10000;
   display: flex;
   align-items: center;
   gap: 12px;

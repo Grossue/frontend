@@ -1,72 +1,158 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { useTheme } from "styled-components";
+import React, { useState, useEffect } from "react";
+import styled, { useTheme } from "styled-components";
 import FONT from "../styles/font";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as Settings } from "../assets/Settings.svg";
 import { ReactComponent as Divider } from "../assets/Divider.svg";
 import { ReactComponent as MoveMemory } from "../assets/MoveMemory.svg";
+import { getDictionaryList, deleteDictionary } from "../api/Dictionary";
+import { getArticleMemory, getArticleMemoryCalender } from "../api/Memory";
+import { useUser } from "../context/UserContext";
 
+// 단어장
 interface WordItem {
   term: string;
   meaning: string;
   type: string;
+  hanja: string;
+  targetCode: string;
 }
 
-const mockWords: WordItem[] = [
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-  { term: "증가하다", meaning: "양이나 수치가 늘다.", type: "동사" },
-];
 const MyPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { user, setUser } = useUser();
 
-  const [words, setWords] = useState<WordItem[]>(mockWords);
-  const [level, setLevel] = useState<number>(() => {
-    // localStorage에서 가져오기, 없으면 기본 1
-    const storedLevel = localStorage.getItem("user_level");
-    return storedLevel ? parseInt(storedLevel, 10) : 1;
-  });
-  const handleDelete = (index: number) => {
-    setWords(words.filter((_, i) => i !== index));
+  const [words, setWords] = useState<WordItem[]>([]);
+  const [level, setLevel] = useState<number>(1);
+
+  const [memoryDates, setMemoryDates] = useState<number[]>([]);
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const date = today.getDate();
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  const firstDayOfMonth = 1;
+
+  const [selectedDate, setSelectedDate] = useState<number>(date);
+  const [todayArticles, setTodayArticles] = useState<
+    { id: number; title: string }[]
+  >([]);
+
+  // 초기 level state 동기화
+  useEffect(() => {
+    if (user) {
+      const lvl = Number(user.level.replace("LEVEL", ""));
+      setLevel(lvl);
+    }
+  }, [user]);
+
+  // 단어장 API
+  useEffect(() => {
+    const fetchWords = async () => {
+      try {
+        const res = await getDictionaryList();
+        if (res.isSuccess) {
+          const wordList: WordItem[] = res.data.results.map((item: any) => ({
+            term: item.word,
+            meaning: item.definition,
+            type: item.pos,
+            hanja: "",
+            targetCode: item.targetCode,
+          }));
+          setWords(wordList);
+        }
+      } catch (err) {
+        console.error("단어장 불러오기 실패:", err);
+      }
+    };
+    fetchWords();
+  }, []);
+
+  // 단어장 삭제
+  const handleDelete = async (index: number) => {
+    const word = words[index];
+    try {
+      const res = await deleteDictionary(word.targetCode);
+      if (res.isSuccess) {
+        setWords(words.filter((_, i) => i !== index));
+      }
+    } catch (err) {
+      console.error("단어 삭제 실패:", err);
+    }
   };
 
-  // 레벨 설정
+  // 뉴스메모리 캘린더 API
+  useEffect(() => {
+    const fetchMemoryDates = async () => {
+      try {
+        const yearMonth = `${year}-${month.toString().padStart(2, "0")}`;
+        const res = await getArticleMemoryCalender(yearMonth);
+        if (res.isSuccess) setMemoryDates(res.data);
+      } catch (err) {
+        console.error("뉴스메모리 날짜 불러오기 실패:", err);
+      }
+    };
+    fetchMemoryDates();
+  }, [year, month]);
+
+  // 특정 날짜 뉴스메모리 API
+  useEffect(() => {
+    const fetchTodayArticles = async () => {
+      try {
+        const dateStr = `${year}-${month
+          .toString()
+          .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`;
+        const res = await getArticleMemory(dateStr);
+        if (res.isSuccess) setTodayArticles(res.data);
+      } catch (err) {
+        console.error("오늘 뉴스메모리 불러오기 실패:", err);
+      }
+    };
+    fetchTodayArticles();
+  }, [year, month, selectedDate]);
+
+  // 레벨 정보
+  const levelInfo: Record<
+    string,
+    { label: string; icon: string; color: string }
+  > = {
+    LEVEL1: { label: "새싹", icon: "🌱", color: "#4CAF50" },
+    LEVEL2: { label: "새싹", icon: "🌿", color: "#4CAF50" },
+    LEVEL3: { label: "꽃", icon: "🌸", color: "#F92C5C" },
+  };
+
+  // 레벨 변경
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedLevel = Number(e.target.value);
     setLevel(selectedLevel);
+
+    if (user) {
+      const updatedUser = { ...user, level: `LEVEL${selectedLevel}` };
+      setUser(updatedUser);
+    }
     localStorage.setItem("user_level", selectedLevel.toString());
   };
 
-  // 오늘 날짜
-  const today = new Date();
-
-  const year = today.getFullYear(); // 연도, 예: 2025
-  const month = today.getMonth() + 1; // 월 (0~11 이므로 +1), 예: 8
-  const date = today.getDate(); // 일, 예: 19
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
-  const day = days[today.getDay()]; // 요일, 예: "월"
-
-  // 1일 기준요일 (0 = 일요일, 1 = 월요일, ..., 5 = 금요일, 6 = 토요일)
-  const firstDayOfMonth = 5; // 1일이 금요일
-
-  // 뉴스 메모리 임시 날짜
-  const memoryDates = [3, 5, 12, 16, 17, 18]; // 동그라미 표시할 날짜
   return (
     <Container>
       <Title style={FONT.xxxl.bold}>마이페이지</Title>
+
       <Main>
         <ProfileCard>
           <Avatar src="/grossueLogo.png" alt="avatar" />
           <ProfileInfo>
             <Name>
-              김구름 <Status>새싹</Status>
+              {user?.nickname || "로딩 중..."}{" "}
+              {user && (
+                <Status levelColor={levelInfo[user.level].color}>
+                  {levelInfo[user.level].icon} {levelInfo[user.level].label}
+                </Status>
+              )}
             </Name>
-            <Email>example@email.com</Email>
+            <Email>{user?.email}</Email>
           </ProfileInfo>
 
-          {/* 레벨 설정 부분 */}
           <LevelSelectWrapper>
             <label style={FONT.md.regular}>
               <Settings id="settings" />
@@ -77,7 +163,7 @@ const MyPage: React.FC = () => {
                 level={level}
               >
                 <option value={1}>🌱 새싹 - 대화형</option>
-                <option value={2}>🌱 새싹 - 일반형</option>
+                <option value={2}>🌿 새싹 - 일반형</option>
                 <option value={3}>🌸 꽃</option>
               </LevelSelect>
             </label>
@@ -87,18 +173,25 @@ const MyPage: React.FC = () => {
         <Stats>
           <StatBox>
             <StatTitle>연속 출석일</StatTitle>
-            <StatValue style={FONT.xl.semibold}>3일</StatValue>
+            <StatValue style={FONT.xl.semibold}>
+              {user?.consecutiveAttendanceDays ?? "-"}일
+            </StatValue>
           </StatBox>
           <StatBox>
             <StatTitle>리워드</StatTitle>
-            <StatValue style={FONT.xl.semibold}>23점</StatValue>
+            <StatValue style={FONT.xl.semibold}>
+              {user?.reward ?? "-"}점
+            </StatValue>
           </StatBox>
           <StatBox>
             <StatTitle>읽은 뉴스</StatTitle>
-            <StatValue style={FONT.xl.semibold}>15개</StatValue>
+            <StatValue style={FONT.xl.semibold}>
+              {user?.readCnt ?? "-"}개
+            </StatValue>
           </StatBox>
         </Stats>
       </Main>
+
       <Main>
         <MemoryHeader>
           <MemoryTitle style={FONT.xxl.bold}>나의 뉴스 메모리</MemoryTitle>
@@ -106,7 +199,7 @@ const MyPage: React.FC = () => {
         <CalendarWrapper>
           <CalendarContainer>
             <CalendarHeader>
-              {["일", "월", "화", "수", "목", "금", "토"].map((day, i) => (
+              {days.map((day, i) => (
                 <CalendarDay key={i} isHeader>
                   {day}
                 </CalendarDay>
@@ -114,14 +207,17 @@ const MyPage: React.FC = () => {
             </CalendarHeader>
 
             <Calendar>
-              {/* 1일 전 빈칸 채우기 */}
               {Array.from({ length: firstDayOfMonth }).map((_, i) => (
                 <CalendarDay key={`empty-${i}`} />
               ))}
 
-              {/* 실제 날짜 채우기 */}
               {Array.from({ length: 31 }, (_, i) => (
-                <CalendarDay key={i + 1} isToday={i + 1 === date}>
+                <CalendarDay
+                  key={i + 1}
+                  isToday={i + 1 === date}
+                  onClick={() => setSelectedDate(i + 1)}
+                  style={{ cursor: "pointer" }}
+                >
                   {i + 1}
                   {memoryDates.includes(i + 1) && <Dot />}
                 </CalendarDay>
@@ -132,36 +228,39 @@ const MyPage: React.FC = () => {
 
           <TodayNews>
             <NewsTitle style={FONT.md.regular}>
-              {month}월 {date}일 {day}요일{" "}
-              <span id="date">{memoryDates.length}개</span>
+              {month}월 {selectedDate}일{" "}
+              {days[new Date(year, month - 1, selectedDate).getDay()]}요일{" "}
+              <span id="date">{todayArticles.length}개</span>
             </NewsTitle>
 
             <NewsList>
-              <NewsItem
-                style={FONT.md.semibold}
-                onClick={() => navigate("/newsmemory1/general")}
-              >
-                조경태, 특검 출석하며 '당내 내란 동조세력' 존재 강조
-                <MoveMemory id="move" />
-              </NewsItem>
-              <NewsItem
-                style={FONT.md.semibold}
-                onClick={() => navigate("/newsmemory1/script")}
-              >
-                조경태, 특검 출석하며 '당내 내란 동조세력' 존재 강조
-                <MoveMemory id="move" />
-              </NewsItem>
-              <NewsItem
-                style={FONT.md.semibold}
-                onClick={() => navigate("/newsmemory2")}
-              >
-                조경태, 특검 출석하며 '당내 내란 동조세력' 존재 강조
-                <MoveMemory id="move" />
-              </NewsItem>
+              {todayArticles.map((article) => (
+                <NewsItem
+                  key={article.id}
+                  style={FONT.md.semibold}
+                  onClick={() => {
+                    if (!user) return;
+                    const stateData = {
+                      articleId: article.id,
+                      year,
+                      month,
+                      date: selectedDate,
+                      title: article.title,
+                    };
+                    console.log("뉴스메모리 이동 state:", stateData); // 여기서 확인 가능
+
+                    // NewsMemoryLoadingPage로 이동
+                    navigate(`/newsmemory/loading`, { state: stateData });
+                  }}
+                >
+                  {article.title} <MoveMemory id="move" />
+                </NewsItem>
+              ))}
             </NewsList>
           </TodayNews>
         </CalendarWrapper>
       </Main>
+
       <Main>
         <WordSection>
           <WordHeader>
@@ -175,7 +274,7 @@ const MyPage: React.FC = () => {
               <WordCard key={i}>
                 <WordMain>
                   <WordTerm>{word.term}</WordTerm>
-                  <WordHanja> 增加하다</WordHanja>
+                  <WordHanja>{word.hanja}</WordHanja>
                   <br />
                   <WordType>{word.type}</WordType>
                   <WordMeaning> {word.meaning}</WordMeaning>
@@ -191,8 +290,8 @@ const MyPage: React.FC = () => {
     </Container>
   );
 };
+
 export default MyPage;
-/* Styled Components */
 const Container = styled.div`
   padding: 60px 0;
   text-align: center;
@@ -239,10 +338,11 @@ const Name = styled.div`
   font-size: 18px;
 `;
 
-const Status = styled.span`
-  color: #4caf50;
+const Status = styled.span<{ levelColor: string }>`
   font-size: 14px;
   margin-left: 6px;
+  color: ${({ levelColor }) => levelColor};
+  font-weight: 600;
 `;
 
 const Email = styled.div`
@@ -318,7 +418,6 @@ const Calendar = styled.div`
   grid-template-columns: repeat(7, 40px);
   gap: 2px;
 `;
-
 const CalendarDay = styled.div<{ isHeader?: boolean; isToday?: boolean }>`
   width: 32px;
   height: 32px;
@@ -332,6 +431,12 @@ const CalendarDay = styled.div<{ isHeader?: boolean; isToday?: boolean }>`
   border-radius: 50%;
   border: none;
   position: relative;
+  cursor: ${({ isHeader }) => (isHeader ? "default" : "pointer")};
+
+  &:not(:is([isToday])):hover {
+    background-color: #eaeaec; /* hover 색상 */
+    transition: background-color 0.2s ease-in-out;
+  }
 `;
 
 const Dot = styled.div`

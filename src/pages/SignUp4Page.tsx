@@ -10,11 +10,13 @@ const SignUp4Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const email = location.state?.email || ""; // 전달된 이메일 받기
+  // 전달된 변수들 받기
+  const email = location.state?.email || "";
   const password = location.state?.password || "";
   const nickname = location.state?.nickname || "";
   const gender = location.state?.gender || "";
   const birthYear = location.state?.birthYear || "";
+  const schoolId = location.state?.schoolId || "";
 
   useEffect(() => {
     console.log("회원가입 정보 :", location.state);
@@ -31,6 +33,7 @@ const SignUp4Page = () => {
         gender,
         birthYear,
         level: selected,
+        schoolId,
       }); // 회원가입
       console.log("회원가입 완료 :", response.data);
       navigate("/login");
