@@ -1,45 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import FONT from "../styles/font";
 import { useNavigate } from "react-router-dom";
+import { getSchoolsRank } from "../api/School"; // API import
+
+interface SchoolRank {
+  id: string;
+  name: string;
+  addr: string;
+  reward_sum: number;
+  isMySchool: boolean;
+}
 
 const RankingPage: React.FC = () => {
+  const [schools, setSchools] = useState<SchoolRank[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRank = async () => {
+      try {
+        const res = await getSchoolsRank();
+        if (res.isSuccess) {
+          setSchools(res.data);
+        }
+      } catch (err) {
+        console.error("학교 랭킹 불러오기 실패", err);
+      }
+    };
+    fetchRank();
+  }, []);
+
   return (
     <PageWrapper>
       <Title style={FONT.xxxl.bold}>우리 학교의 랭킹은?</Title>
       <DateText>같은 나이 학생들끼리의 랭킹이에요! </DateText>
 
       <IssueList>
-        <IssueItem>
-          <Rank1>1</Rank1>서울초등학교<p style={FONT.md.medium}>889 R</p>
-        </IssueItem>
-        <IssueItem2>
-          <Rank2>2</Rank2>덕성초등학교<p style={FONT.md.medium}>856 R</p>
-        </IssueItem2>
-        <IssueItem>
-          <Rank3>3</Rank3>경기초등학교<p style={FONT.md.medium}>823 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>4</Rank4>광주초등학교<p style={FONT.md.medium}>822 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>5</Rank4>제주초등학교<p style={FONT.md.medium}>810 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>6</Rank4>강원초등학교<p style={FONT.md.medium}>750 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>7</Rank4>인천초등학교<p style={FONT.md.medium}>723 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>8</Rank4>부산초등학교<p style={FONT.md.medium}>711 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>9</Rank4>대전초등학교<p style={FONT.md.medium}>695 R</p>
-        </IssueItem>
-        <IssueItem>
-          <Rank4>10</Rank4>세종초등학교<p style={FONT.md.medium}>662 R</p>
-        </IssueItem>
+        {schools.map((school, index) => {
+          const rankNum = index + 1;
+          const isMySchool = school.isMySchool;
+          const RankStyle =
+            rankNum === 1
+              ? Rank1
+              : rankNum === 2
+              ? Rank2
+              : rankNum === 3
+              ? Rank3
+              : Rank4;
+
+          const IssueItemStyle = isMySchool ? IssueItem2 : IssueItem;
+
+          return (
+            <IssueItemStyle
+              key={school.id}
+              onClick={() => navigate(`/school/${school.id}`)}
+            >
+              <RankStyle>{rankNum}</RankStyle>
+              {school.name}
+              <p style={FONT.md.medium}>{school.reward_sum} R</p>
+            </IssueItemStyle>
+          );
+        })}
       </IssueList>
     </PageWrapper>
   );
