@@ -92,7 +92,7 @@ const IssueLoadingPage: React.FC = () => {
           keyword,
           articleType,
           levelParam,
-          false
+          false // 테스트 설정
         );
         console.log("기사 생성:", response.data);
         setData(response.data);

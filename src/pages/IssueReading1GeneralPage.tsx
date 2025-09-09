@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 import styled, { css, keyframes } from "styled-components";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
@@ -20,6 +21,7 @@ import { ReactComponent as Move } from "../assets/Move.svg";
 import { ReactComponent as RecommandIcon } from "../assets/RecommandIcon.svg";
 import { ReactComponent as Previous } from "../assets/Previous.svg";
 import { ReactComponent as Next } from "../assets/Next.svg";
+import { getArticleFeedback, getArticleRecommend1 } from "../api/Reading";
 
 interface Data {
   ai_result: AI_Result;
@@ -67,9 +69,11 @@ interface Image {
 
 const IssueReading1GeneralPage = () => {
   const location = useLocation();
-  const data = (location.state as { content: Data })?.content;
-  const ai_result = data.ai_result;
-  const sessionId = data.session_id;
+  const locationState = location.state as { content?: Data };
+  const [data, setData] = useState<Data | null>(locationState?.content || null);
+  //const data = (location.state as { content: Data })?.content;
+  //const ai_result = data.ai_result;
+  //const sessionId = data.session_id;
 
   // 우측 슬라이드 탭
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -77,18 +81,137 @@ const IssueReading1GeneralPage = () => {
   const [isQnaOpen, setIsQnaOpen] = useState(false);
   const isAnyOpen = isQuizOpen || isDictOpen || isQnaOpen;
 
+  // 출처 url
   const [isUrlOpen, setIsUrlOpen] = useState(false);
 
+  // 단어 팝업 모달창
   const [popupContent, setPopupContent] = useState<Word | null>(null);
 
+  // 뒤로가기 추천기사
+  const [recommendedArticles, setRecommendedArticles] = useState<string[]>([]);
+  const [recLoading, setRecLoading] = useState(false);
+  const [recError, setRecError] = useState<string | null>(null);
+
+  // 퀴즈 리워드 모달창
+  const [isRewardOpen, setIsRewardOpen] = useState(false);
+  const [rewardCnt, setRewardCnt] = useState<number | null>(null);
+
+  const handleRewardOpen = (cnt: number) => {
+    setRewardCnt(cnt);
+    setIsRewardOpen(true);
+  };
+  const handleRewardClose = () => {
+    setIsRewardOpen(false);
+    setRewardCnt(null);
+  };
+  // 퀴즈 생각해보기 피드백 API 연동
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const handleThinkingFeedback = async (answer: string) => {
+    try {
+      const res = await getArticleFeedback(answer, sessionId, false);
+      if (res?.data) {
+        setFeedback(res.data); // API에서 내려오는 피드백 본문
+        setIsThinkingOpen(true); // 모달 열기
+      }
+    } catch (error) {
+      console.error("피드백 API 호출 실패", error);
+      setFeedback("피드백을 불러오는 중 오류가 발생했습니다.");
+      setIsThinkingOpen(true);
+    }
+  };
+
+  // 퀴즈 생각해보기 예시답안 모달창
+  const [isThinkingOpen, setIsThinkingOpen] = useState(false);
+  const handleThinkingOpen = () => setIsThinkingOpen(true);
+  const handleThinkingClose = () => setIsThinkingOpen(false);
+
+  // 뒤로가기 추천창
+  const navigate = useNavigate();
+  const [isRecommandOpen, setIsRecommandOpen] = useState(false);
+  const handleRecommandClose = () => setIsRecommandOpen(false);
+
+  // 페이지네이션 - 현재 페이지 표시
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 뒤로가기 추천기사 API 연동
+  useEffect(() => {
+    if (!data?.ai_result?.title) return;
+
+    const fetchRecommendedArticles = async () => {
+      if (!ai_result?.title) return;
+
+      setRecLoading(true);
+      setRecError(null);
+
+      try {
+        const res = await getArticleRecommend1(ai_result.title); // API 호출
+        if (res && res.data) {
+          setRecommendedArticles(res.data); // 배열만 넣기
+        } else {
+          setRecommendedArticles([]); // 안전하게 빈 배열
+        }
+      } catch (err) {
+        console.error("추천기사 불러오기 실패", err);
+        setRecError("추천 기사를 불러오는 중 오류가 발생했습니다.");
+        setRecommendedArticles([]);
+      } finally {
+        setRecLoading(false);
+      }
+    };
+
+    fetchRecommendedArticles();
+  }, []);
+
+  // 뒤로가기 모달창 띄우기
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.pathname);
+    const handlePopState = (event: PopStateEvent) => {
+      window.history.pushState(null, "", window.location.pathname);
+
+      //event.preventDefault();
+      setIsRecommandOpen(true); // 모달 열기
+      // 실제 페이지 이동은 막기
+      console.log("뒤로가기");
+      navigate(1); // 뒤로가기 취소하고 현재 페이지 유지
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [navigate]);
+
+  // 새로고침 시 sessionStorage에서 불러오기
+  useEffect(() => {
+    if (!data) {
+      const savedData = sessionStorage.getItem("issueData");
+      if (savedData) {
+        setData(JSON.parse(savedData));
+      }
+    } else {
+      sessionStorage.setItem("issueData", JSON.stringify(data));
+    }
+  }, [data]);
+  if (!data) {
+    return <div>데이터를 불러오는 중입니다...</div>; // 로딩 UI
+  }
+
+  const ai_result = data.ai_result;
+  const sessionId = data.session_id;
+
+  // 단어 모달창 띄우기
   const handleWordClick = (word: Word) => {
     setPopupContent(word);
   };
 
+  // 단어 모달창 닫기
   const closePopup = () => {
     setPopupContent(null);
   };
 
+  // 단어 하이라이트
   const highlightWords = (text: string, words: Word[]) => {
     const terms = words.map((w) => w.term);
     const pattern = new RegExp(`(${terms.join("|")})`, "g");
@@ -108,7 +231,6 @@ const IssueReading1GeneralPage = () => {
     });
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
   const paragraphs = [...ai_result.article.split("\n\n"), ai_result.summary]; // 마지막에 요약 추가
   const totalPages = paragraphs.length;
 
@@ -120,37 +242,7 @@ const IssueReading1GeneralPage = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
-  // 퀴즈 리워드 모달창
-  const [isRewardOpen, setIsRewardOpen] = useState(false);
-  const handleRewardOpen = () => setIsRewardOpen(true);
-  const handleRewardClose = () => setIsRewardOpen(false);
-
-  // 퀴즈 생각해보기 예시답안 모달창
-  const [isThinkingOpen, setIsThinkingOpen] = useState(false);
-  const handleThinkingOpen = () => setIsThinkingOpen(true);
-  const handleThinkingClose = () => setIsThinkingOpen(false);
-
-  // 뒤로가기 추천창
-  const navigate = useNavigate();
-  const [isRecommandOpen, setIsRecommandOpen] = useState(false);
-  const handleRecommandClose = () => setIsRecommandOpen(false);
-
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      event.preventDefault();
-      setIsRecommandOpen(true); // 모달 열기
-      // 👉 여기서 실제 페이지 이동은 막을 수 있음
-      navigate(1); // 뒤로가기 취소하고 현재 페이지 유지
-    };
-
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [navigate]);
-
-  // 뒤로가기 api 연결
+  // 뒤로가기 추천기사 화면 이동
   const handleIssueClick = (issue: string) => {
     navigate("/loading", { state: { keyword: issue } });
   };
@@ -195,9 +287,9 @@ const IssueReading1GeneralPage = () => {
           </Caption>
         </Img>
         <ArticleWrapper>
-          <BubbleWrapper>
+          <>
             {currentPage === totalPages ? (
-              <>
+              <BubbleWrapperRight>
                 <SummaryFinalBox>
                   <SummaryFinalTitle style={FONT.xl.bold}>
                     AI 요약
@@ -213,16 +305,16 @@ const IssueReading1GeneralPage = () => {
                 <SummaryIcon>
                   <Teacher />
                 </SummaryIcon>
-              </>
+              </BubbleWrapperRight>
             ) : (
-              <>
+              <BubbleWrapperLeft>
                 <Student />
                 <Bubble>
                   {highlightWords(paragraphs[currentPage - 1], ai_result.words)}
                 </Bubble>
-              </>
+              </BubbleWrapperLeft>
             )}
-          </BubbleWrapper>
+          </>
         </ArticleWrapper>
         <Pagination>
           <PageButton disabled={currentPage === 1} onClick={handlePrev}>
@@ -276,6 +368,7 @@ const IssueReading1GeneralPage = () => {
         thinking_question={ai_result.thinking_question}
         onReward={handleRewardOpen} // 채점 완료 시 호출
         onThinking={handleThinkingOpen} // 채점 완료 시 호출
+        onThinkingFeedback={handleThinkingFeedback}
       />
       <DictionaryPanel
         isOpen={isDictOpen}
@@ -286,6 +379,8 @@ const IssueReading1GeneralPage = () => {
         onClose={() => setIsQnaOpen(false)}
         sessionId={sessionId}
       />
+
+      {/* AI 용어 설명 모달창 */}
       {popupContent && (
         <PopupOverlay onClick={closePopup}>
           <PopupBox onClick={(e) => e.stopPropagation()}>
@@ -302,56 +397,54 @@ const IssueReading1GeneralPage = () => {
           </PopupBox>
         </PopupOverlay>
       )}
+
+      {/* 리워드 모달창 */}
       {isRewardOpen && (
         <ModalOverlay onClick={handleRewardClose}>
           <ModalBox onClick={(e) => e.stopPropagation()}>
             <h2>🎉 축하합니다! 🎉</h2>
-            <p style={FONT.xxl.medium}> 5리워드를 획득했습니다!</p>
+            <p style={FONT.xxl.medium}>{rewardCnt} 리워드를 획득했습니다!</p>
             <Reward id="reward" />
             <ModalButton onClick={handleRewardClose}>확인</ModalButton>
           </ModalBox>
         </ModalOverlay>
       )}
+
+      {/* 생각해보기 모달창 */}
       {isThinkingOpen && (
         <ModalOverlay onClick={handleThinkingClose}>
           <ModalBox onClick={(e) => e.stopPropagation()}>
             <RecommandIcon />
             <p style={FONT.xxl.bold}>좋은 접근이에요! 👍</p>
             <p style={FONT.xl.regular}>
-              혹시 다른 표현 방식이 궁금하다면
-              <br />
-              한번 살펴보면 좋을 것 같아요.
+              혹시 다른 표현 방식이 궁금하다면 한번 살펴보면 좋을 것 같아요.
             </p>
+            <p id="example" style={FONT.xl.semibold}>
+              📌 피드백
+            </p>
+            <ExampleBox>
+              <ReactMarkdown>
+                {feedback || "피드백을 불러오는 중입니다..."}
+              </ReactMarkdown>
+            </ExampleBox>
             <p id="example" style={FONT.xl.semibold}>
               📌 예시 답안
             </p>
             <ExampleBox>
               <ul>
-                <li>
-                  우리나라는 대학과 기업, 연구소가 함께 협력해서 기술 개발을 더
-                  빠르게 해야 해요. 왜냐하면 혼자서 하는 것보다 함께 하면 더 큰
-                  힘을 낼 수 있어요. 어떤 사람은 '팀워크보다 돈이 더 중요해'라고
-                  할 수도 있는데, 연구자들이 함께 협력하면 효율도 높아져요.
-                </li>
-                <li>
-                  저는 정부가 이차전지 산업에 지원을 많이 해야 한다고 생각해요.
-                  예를 들어 연구비를 더 주거나 연구센터를 만들어주는 거예요.
-                  누군가는 '세금이 많이 들지 않을까?'라고 할 수도 있지만, 앞서
-                  나가려면 투자도 필요하다고 봐요.
-                </li>
-                <li>
-                  우리나라 회사들이 해외 기업과 협력하거나 지식을 교류하면 좋을
-                  것 같아요. 다른 나라의 좋은 기술을 배우고 우리 기술도 알려주는
-                  식이에요. 어떤 사람은 '우리끼리 하는 게 낫지 않아?' 할 수
-                  있지만, 세계랑 협력하면 새로운 아이디어가 생기고 더 발전할 수
-                  있어요.
-                </li>
+                {ai_result.thinking_question.example_answers.map(
+                  (answer, idx) => (
+                    <li key={idx}>{answer}</li>
+                  )
+                )}
               </ul>
             </ExampleBox>
             <ModalButton onClick={handleThinkingClose}>닫기</ModalButton>
           </ModalBox>
         </ModalOverlay>
       )}
+
+      {/* 뒤로가기 추천기사 모달창 */}
       {isRecommandOpen && (
         <ModalOverlay onClick={handleRecommandClose}>
           <ModalBox onClick={(e) => e.stopPropagation()}>
@@ -361,52 +454,19 @@ const IssueReading1GeneralPage = () => {
               🎯 당신에게 딱 맞는 뉴스 주제를 골라봤어요.
             </p>
 
+            {recLoading && <p>추천 기사 불러오는 중...</p>}
+            {recError && <p>{recError}</p>}
+
             <IssueList>
-              <IssueItem
-                onClick={() =>
-                  handleIssueClick(
-                    "한국 의학계, 신약 개발 및 치료기술 혁신 속도"
-                  )
-                }
-              >
-                <GreenSearch width={18} height={18} />
-                한국 의학계, 신약 개발 및 치료기술 혁신 속도
-                <Move id="move" />
-              </IssueItem>
-              <IssueItem
-                onClick={() =>
-                  handleIssueClick(
-                    "음식점과 가정에서 음식물 쓰레기 처리에 대한 이해와 해결책"
-                  )
-                }
-              >
-                <GreenSearch width={18} height={18} />
-                음식점과 가정에서 음식물 쓰레기 처리에 대한 이해와 해결책
-                <Move id="move" />
-              </IssueItem>
-              <IssueItem
-                onClick={() =>
-                  handleIssueClick(
-                    "한국 의학계, 신약 개발 및 치료기술 혁신 속도"
-                  )
-                }
-              >
-                <GreenSearch width={18} height={18} />
-                한국 의학계, 신약 개발 및 치료기술 혁신 속도
-                <Move id="move" />
-              </IssueItem>
-              <IssueItem
-                onClick={() =>
-                  handleIssueClick(
-                    "몽골 화석에서 티라노사우루스의 새 종 및 진화 과정 증거 발견"
-                  )
-                }
-              >
-                <GreenSearch width={18} height={18} />
-                몽골 화석에서 티라노사우루스의 새 종 및 진화 과정 증거 발견
-                <Move id="move" />
-              </IssueItem>
+              {recommendedArticles.map((title, idx) => (
+                <IssueItem key={idx} onClick={() => handleIssueClick(title)}>
+                  <GreenSearch width={18} height={18} />
+                  {title}
+                  <Move id="move" />
+                </IssueItem>
+              ))}
             </IssueList>
+
             <ModalButton onClick={() => navigate("/")}>괜찮아요</ModalButton>
           </ModalBox>
         </ModalOverlay>
@@ -498,7 +558,14 @@ const ArticleWrapper = styled.div`
   margin-top: 50px;
 `;
 
-const BubbleWrapper = styled.div`
+const BubbleWrapperLeft = styled.div`
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  border-radius: 20px;
+  width: 100%;
+`;
+const BubbleWrapperRight = styled.div`
   display: flex;
   justify-content: flex-end; // 오른쪽 정렬
   align-items: flex-start;
@@ -506,7 +573,6 @@ const BubbleWrapper = styled.div`
   border-radius: 20px;
   width: 100%;
 `;
-
 const Bubble = styled.div`
   background-color: #f3f3f3;
   color: #333;
@@ -715,12 +781,12 @@ const ExampleBox = styled.div`
   text-align: left;
   color: #333;
   font-size: 17px;
-  display: flex;
-  align-items: center;
   gap: 10px;
   cursor: pointer;
   margin: 2px 0px;
   position: relative;
+  white-space: pre-line;
+  margin-bottom: 10px;
 
   #move {
     position: absolute;
@@ -730,6 +796,20 @@ const ExampleBox = styled.div`
     padding-left: 20px;
   }
   li {
-    margin-bottom: 12px; /* 항목 사이 간격 */
+    margin-bottom: 12px;
+  }
+
+  max-height: 150px; /* 원하는 높이 */
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
   }
 `;
