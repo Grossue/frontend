@@ -93,7 +93,7 @@ export const getArticleQna = async (sessionId: string, question: string) => {
 export const getArticleIssues = async (category: string) => {
   try {
     const res = await request.get({
-      url: `/v1/article/issues?category=${category}`,
+      url: `/v1/article/issues?category=${category}&date=2025-10-28`,
       params: {},
     });
     console.log("카테고리별 이슈 목록 성공", res);

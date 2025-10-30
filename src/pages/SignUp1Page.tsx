@@ -41,7 +41,7 @@ const SignUp1Page = () => {
     }
   };
 
-  const isNextEnabled = isEmailValid && code.trim().length > 0;
+  const isNextEnabled = isEmailValid;
 
   return (
     <Wrapper>
@@ -67,17 +67,6 @@ const SignUp1Page = () => {
         </SendButton>
       </InputRow>
       {emailMessage && <Message isValid={isEmailValid}>{emailMessage}</Message>}
-
-      {/* 인증번호 입력 */}
-      <InputRow>
-        <VerificationInput
-          placeholder="인증번호 입력"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-        <SendButton>전송</SendButton>
-      </InputRow>
-
       <NextButton
         disabled={!isNextEnabled}
         onClick={() => navigate("/signup2", { state: { email } })}

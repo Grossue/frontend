@@ -246,6 +246,7 @@ const PanelHeader = styled.div`
   padding: 16px;
   font-weight: 600;
   font-size: 16px;
+  padding-bottom: 30px;
 `;
 
 const CloseButton = styled.button`

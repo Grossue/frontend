@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
+import { motion } from "framer-motion";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
 import DictionaryToggle from "../components/reading/DictionaryToggle";
@@ -147,7 +148,12 @@ const NewsMemory1ScriptPage = () => {
 
   return (
     <Container>
-      <ArticleBox>
+      <ArticleBox
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Header>
           <HeaderTitle style={FONT.xl.bold}>뉴스메모리</HeaderTitle>
           {formattedDate && <HeaderDate>{formattedDate}</HeaderDate>}
@@ -191,7 +197,17 @@ const NewsMemory1ScriptPage = () => {
         <ArticleWrapper>
           {chatPairs[currentPage] ? (
             chatPairs[currentPage]!.map((item, index) => (
-              <ChatBubbleWrapper key={index}>
+              <ChatBubbleWrapper
+                key={index}
+                as={motion.div}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: index * 0.05,
+                  duration: 0.4,
+                  ease: "easeOut",
+                }}
+              >
                 {item.who === "student" ? (
                   <>
                     <Student />
@@ -210,7 +226,12 @@ const NewsMemory1ScriptPage = () => {
               </ChatBubbleWrapper>
             ))
           ) : (
-            <BubbleWrapperRight>
+            <BubbleWrapperRight
+              as={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
               <SummaryFinalBox>
                 <SummaryFinalTitle style={FONT.lg.bold}>
                   AI 요약 정리
@@ -367,7 +388,7 @@ const Article = styled.div`
   margin: 30px 0;
 `;
 const ArticleWrapper = styled.div`
-  margin-top: 60px;
+  margin-top: 80px;
 `;
 
 const BubbleWrapper = styled.div`

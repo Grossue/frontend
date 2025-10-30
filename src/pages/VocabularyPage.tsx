@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
 import FONT from "../styles/font";
 import { getDictionaryList, deleteDictionary } from "../api/Dictionary";
 
@@ -51,23 +52,37 @@ const VocabularyPage: React.FC = () => {
   return (
     <PageWrapper>
       <Title style={FONT.xxxl.bold}>내 단어장</Title>
-      <WordSection>
-        <WordList>
-          {words.map((word, i) => (
-            <WordCard key={i}>
-              <WordMain>
-                <WordTerm style={FONT.xl.bold}>{word.term}</WordTerm>
-                <br />
-                <WordType style={FONT.md.semibold}>{word.type}</WordType>
-                <WordMeaning style={FONT.lg.medium}>
-                  {" "}
-                  {word.meaning}
-                </WordMeaning>
-              </WordMain>
-              <DeleteButton onClick={() => handleDelete(i)}>삭제</DeleteButton>
-            </WordCard>
-          ))}
-        </WordList>
+      <WordSection
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        {words.length === 0 ? (
+          <EmptyMessage style={FONT.lg.medium}>
+            아직 저장한 단어가 없습니다. <br />
+            기사를 읽으면서 몰랐던 단어를 추가해보세요
+          </EmptyMessage>
+        ) : (
+          <WordList>
+            {words.map((word, i) => (
+              <WordCard key={i}>
+                <WordMain>
+                  <WordTerm style={FONT.xl.bold}>{word.term}</WordTerm>
+                  <br />
+                  <WordType style={FONT.md.semibold}>{word.type}</WordType>
+                  <WordMeaning style={FONT.lg.medium}>
+                    {" "}
+                    {word.meaning}
+                  </WordMeaning>
+                </WordMain>
+                <DeleteButton onClick={() => handleDelete(i)}>
+                  삭제
+                </DeleteButton>
+              </WordCard>
+            ))}
+          </WordList>
+        )}
       </WordSection>
     </PageWrapper>
   );
@@ -132,4 +147,12 @@ const DeleteButton = styled.button`
   position: absolute;
   right: 15px;
   top: 20px;
+`;
+const EmptyMessage = styled.div`
+  text-align: center;
+  color: ${({ theme }) => theme.color.gray50};
+  background-color: ${({ theme }) => theme.color.gray00};
+  padding: 80px 0;
+  border-radius: 16px;
+  line-height: 1.6;
 `;

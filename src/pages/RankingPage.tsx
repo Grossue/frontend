@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import FONT from "../styles/font";
 import { useNavigate } from "react-router-dom";
 import { getSchoolsRank } from "../api/School"; // API import
@@ -54,6 +54,7 @@ const RankingPage: React.FC = () => {
             <IssueItemStyle
               key={school.id}
               onClick={() => navigate(`/school/${school.id}`)}
+              $delay={index * 0.1}
             >
               <RankStyle>{rankNum}</RankStyle>
               {school.name}
@@ -68,6 +69,16 @@ const RankingPage: React.FC = () => {
 
 export default RankingPage;
 
+const fadeUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 const PageWrapper = styled.div`
   padding: 60px 0;
   text-align: center;
@@ -95,8 +106,7 @@ const IssueList = styled.div`
   margin-left: auto;
   margin-right: auto;
 `;
-
-const IssueItem = styled.div`
+const IssueItem = styled.div<{ $delay?: number }>`
   background-color: #f5f5f7;
   padding: 12px 16px;
   border-radius: 12px;
@@ -107,19 +117,23 @@ const IssueItem = styled.div`
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  margin: 2px 0px;
+  margin: 2px 0;
   position: relative;
+  opacity: 0;
+  animation: ${fadeUp} 0.4s ease forwards;
+  animation-delay: ${({ $delay }) => $delay || 0}s;
 
   &:hover {
     background-color: #eaeaec;
   }
+
   p {
     position: absolute;
-
     right: 15px;
     color: ${({ theme }) => theme.color.gray40};
   }
 `;
+
 const Rank1 = styled.div`
   width: 25px;
   height: 25px;

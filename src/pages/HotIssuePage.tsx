@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as GraySearch } from "../assets/GraySearch.svg";
 import { ReactComponent as GreenSearch } from "../assets/GreenSearch.svg";
@@ -14,11 +15,13 @@ interface TagButtonProps {
 
 const HotIssuePage: React.FC = () => {
   const [keyword, setKeyword] = useState("");
-  const [selectedTag, setSelectedTag] = useState<string>("IT/과학");
+  const [selectedTag, setSelectedTag] = useState<string>("정치");
   const [issues, setIssues] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const aiCache = React.useRef<string[] | null>(null);
 
   const navigate = useNavigate();
 
@@ -44,8 +47,14 @@ const HotIssuePage: React.FC = () => {
       setError(null);
       try {
         if (selectedTag === "💡AI 추천") {
-          const res = await getArticleRecommend2();
-          setIssues(res.data);
+          // 캐시가 있으면 재사용
+          if (aiCache.current) {
+            setIssues(aiCache.current);
+          } else {
+            const res = await getArticleRecommend2();
+            setIssues(res.data);
+            aiCache.current = res.data; // 캐시에 저장
+          }
         } else {
           const categoryMap: Record<string, string> = {
             정치: "POLITICS",
@@ -96,7 +105,12 @@ const HotIssuePage: React.FC = () => {
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      as={motion.div}
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <DateText>
         {new Date().getMonth() + 1}월 {new Date().getDate()}일{" "}
       </DateText>
@@ -130,7 +144,15 @@ const HotIssuePage: React.FC = () => {
 
       <IssueList>
         {currentItems.map((issue, i) => (
-          <IssueItem key={i} onClick={() => handleIssueClick(issue)}>
+          <IssueItem
+            key={i}
+            as={motion.div}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05, duration: 0.4, ease: "easeOut" }}
+            onClick={() => handleIssueClick(issue)}
+          >
+            {" "}
             <GreenSearch width={18} height={18} />
             {issue}
           </IssueItem>

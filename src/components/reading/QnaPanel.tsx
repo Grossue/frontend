@@ -150,6 +150,7 @@ const PanelHeader = styled.div`
   padding: 16px;
   font-weight: 600;
   font-size: 16px;
+  padding-bottom: 30px;
 `;
 const CloseButton = styled.button`
   position: absolute;
@@ -185,7 +186,18 @@ const BotIconBox = styled.div`
     height: 24px;
   }
 `;
-
+const fadeInUp = `
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
 const BotMessage = styled.div`
   background-color: ${({ theme }) => theme.color.gray10};
   color: ${({ theme }) => theme.color.gray80};
@@ -193,11 +205,25 @@ const BotMessage = styled.div`
   border-radius: 10px;
   max-width: 250px;
   text-align: left;
-  white-space: pre-wrap; // 줄바꿈 반영
+  white-space: pre-wrap;
+  animation: fadeInUp 0.3s ease forwards; /* ✨ 애니메이션 추가 */
 
-  ul {
-    padding-left: 15px; /* 기본 들여쓰기 제거 */
+  ul,
+  ol {
+    padding-left: 18px;
+    margin: 6px 0;
   }
+
+  li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+  }
+
+  p {
+    margin: 4px 0;
+  }
+
+  ${fadeInUp}
 `;
 
 const UserRow = styled.div`
@@ -205,7 +231,6 @@ const UserRow = styled.div`
   justify-content: flex-end;
   margin-bottom: 10px;
 `;
-
 const UserMessage = styled.div`
   background-color: ${({ theme }) => theme.color.primary70};
   color: white;
@@ -213,6 +238,8 @@ const UserMessage = styled.div`
   border-radius: 10px;
   max-width: 250px;
   text-align: left;
+  animation: fadeInUp 0.3s ease forwards; /* ✨ 애니메이션 추가 */
+  ${fadeInUp}
 `;
 
 const InputBar = styled.div`

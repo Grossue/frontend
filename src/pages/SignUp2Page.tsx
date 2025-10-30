@@ -9,7 +9,8 @@ const SignUp2Page = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
-  const isValidPassword = (pw: string) => /^[A-Za-z\d@$!%*#?&]{8,20}$/.test(pw); // 간단한 정규식
+  const isValidPassword = (pw: string) =>
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,20}$/.test(pw);
 
   const isNextEnabled =
     isValidPassword(password) && password === confirmPassword;
@@ -17,6 +18,7 @@ const SignUp2Page = () => {
   const showMismatchError =
     confirmPassword.length > 0 && password !== confirmPassword;
 
+  const showPasswordError = password.length > 0 && !isValidPassword(password);
   return (
     <Wrapper>
       <StepIndicator>
@@ -39,6 +41,11 @@ const SignUp2Page = () => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
+      {showPasswordError && (
+        <ErrorMessage>
+          비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자로 입력해주세요.
+        </ErrorMessage>
+      )}
 
       <Input
         type="password"

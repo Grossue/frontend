@@ -144,8 +144,6 @@ const DictionaryPanel: React.FC<DictionaryPanelProps> = ({
 
 export default DictionaryPanel;
 
-// ✅ 스타일
-
 const PanelWrapper = styled.div<{ isOpen: boolean }>`
   position: fixed;
   top: 0;
@@ -163,6 +161,7 @@ const PanelWrapper = styled.div<{ isOpen: boolean }>`
 
 const PanelHeader = styled.div`
   padding: 16px;
+  padding-bottom: 30px;
 `;
 
 const CloseButton = styled.button`

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled, { useTheme } from "styled-components";
 import FONT from "../styles/font";
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as Settings } from "../assets/Settings.svg";
 import { ReactComponent as Divider } from "../assets/Divider.svg";
@@ -138,7 +139,11 @@ const MyPage: React.FC = () => {
     <Container>
       <Title style={FONT.xxxl.bold}>마이페이지</Title>
 
-      <Main>
+      <Main
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
         <ProfileCard>
           <Avatar src="/grossueLogo.png" alt="avatar" />
           <ProfileInfo>
@@ -192,7 +197,11 @@ const MyPage: React.FC = () => {
         </Stats>
       </Main>
 
-      <Main>
+      <Main
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+      >
         <MemoryHeader>
           <MemoryTitle style={FONT.xxl.bold}>나의 뉴스 메모리</MemoryTitle>
         </MemoryHeader>
@@ -261,7 +270,11 @@ const MyPage: React.FC = () => {
         </CalendarWrapper>
       </Main>
 
-      <Main>
+      <Main
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+      >
         <WordSection>
           <WordHeader>
             <WordTitle style={FONT.xxl.bold}>단어장</WordTitle>
@@ -302,7 +315,7 @@ const Title = styled.div`
   margin-top: 20px;
   color: ${({ theme }) => theme.color.gray80};
 `;
-const Main = styled.div`
+const Main = styled(motion.div)`
   width: 900px;
   border-radius: 24px;
   margin: 0 auto;

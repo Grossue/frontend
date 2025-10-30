@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
+import { motion } from "framer-motion";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
 import DictionaryToggle from "../components/reading/DictionaryToggle";
@@ -135,7 +136,12 @@ const NewsMemory1GeneralPage = () => {
 
   return (
     <Container>
-      <ArticleBox>
+      <ArticleBox
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Header>
           <HeaderTitle style={FONT.xl.bold}>뉴스메모리</HeaderTitle>
           {formattedDate && <HeaderDate>{formattedDate}</HeaderDate>}
@@ -179,52 +185,26 @@ const NewsMemory1GeneralPage = () => {
             출처: {ai_result.image.image_source}
           </Caption>
         </Img>
-
-        <ArticleWrapper>
-          <>
-            {currentPage === totalPages ? (
-              <BubbleWrapperRight>
-                <SummaryFinalBox>
-                  <SummaryFinalTitle style={FONT.xl.bold}>
-                    AI 요약
-                  </SummaryFinalTitle>
-                  <SummaryFinalText style={FONT.md.regular}>
-                    {ai_result.summary.split("\n").map((line, index) => (
-                      <div key={index}>
-                        {index + 1}. {highlightWords(line, ai_result.words)}
-                      </div>
-                    ))}
-                  </SummaryFinalText>
-                </SummaryFinalBox>
-                <SummaryIcon>
-                  <Teacher />
-                </SummaryIcon>
-              </BubbleWrapperRight>
-            ) : (
-              <BubbleWrapperLeft>
-                <Student />
-                <Bubble>
-                  {highlightWords(paragraphs[currentPage - 1], ai_result.words)}
-                </Bubble>
-              </BubbleWrapperLeft>
-            )}
-          </>
-        </ArticleWrapper>
-
-        <Pagination>
-          <PageButton disabled={currentPage === 1} onClick={handlePrev}>
-            <Previous />
-          </PageButton>
+        <Article>
+          {ai_result.article.split("\n\n").map((paragraph, i) => (
+            <p key={i}>
+              {highlightWords(paragraph, ai_result.words)}
+              <br />
+              <br />
+            </p>
+          ))}
+        </Article>
+        <Line />
+        <SummaryTitle style={FONT.xxl.bold}>
           <span>
-            {currentPage} / {totalPages}
+            <Book />
           </span>
-          <PageButton
-            disabled={currentPage === totalPages}
-            onClick={handleNext}
-          >
-            <Next />
-          </PageButton>
-        </Pagination>
+          {"  "}
+          AI 요약
+        </SummaryTitle>
+        <SummaryBox>
+          <Summary style={FONT.md.bold}>{ai_result.summary}</Summary>
+        </SummaryBox>
       </ArticleBox>
 
       {popupContent && (
@@ -341,8 +321,36 @@ const ArticleBox = styled.div`
   text-align: left;
   transition: transform 0.3s ease;
 `;
+
+const Article = styled.div`
+  color: ${({ theme }) => theme.color.gray80};
+  line-height: 160%;
+  margin: 50px 0;
+  margin-top: 60px;
+`;
+
+const SummaryTitle = styled.div`
+  color: ${({ theme }) => theme.color.primary70};
+  display: flex;
+  align-items: center;
+  span {
+    transform: translateY(10%);
+    margin-right: 10px;
+  }
+`;
+const SummaryBox = styled.div`
+  width: 800px;
+  border-radius: 20px;
+  margin: 20px 0;
+  margin-bottom: 100px;
+  padding: 30px 20px;
+  background-color: ${({ theme }) => theme.color.gray05};
+`;
+const Summary = styled.div`
+  color: ${({ theme }) => theme.color.gray80};
+`;
 const ArticleWrapper = styled.div`
-  margin-top: 50px;
+  margin-top: 60px;
 `;
 const BubbleWrapperLeft = styled.div`
   display: flex;

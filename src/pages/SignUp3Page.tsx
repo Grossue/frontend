@@ -130,12 +130,6 @@ const SignUp3Page = () => {
       <Title>프로필 설정</Title>
       <Subtitle>아래 내용을 입력해 주세요.</Subtitle>
 
-      <ProfileImageWrapper>
-        <ImageCircle>
-          <UploadIcon>📷</UploadIcon>
-        </ImageCircle>
-      </ProfileImageWrapper>
-
       <Form>
         <Label>닉네임</Label>
         <NicknameRow>

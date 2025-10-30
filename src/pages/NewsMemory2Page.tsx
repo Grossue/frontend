@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import styled, { css, keyframes } from "styled-components";
+import { motion } from "framer-motion";
 import FONT from "../styles/font";
 import { ReactComponent as Close } from "../assets/Close.svg";
 import { ReactComponent as Book } from "../assets/Book.svg";
@@ -120,7 +121,12 @@ const NewsMemory2Page = () => {
 
   return (
     <Container>
-      <ArticleBox>
+      <ArticleBox
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Header>
           <HeaderTitle style={FONT.xl.bold}>뉴스메모리</HeaderTitle>
           {formattedDate && <HeaderDate>{formattedDate}</HeaderDate>}
@@ -268,7 +274,7 @@ const Url = styled.div`
 `;
 const ArticleBox = styled.div`
   width: 800px;
-  margin: 50px auto;
+  margin: 0px auto;
   text-align: left;
   transition: transform 0.3s ease;
 `;
@@ -295,7 +301,7 @@ const Caption = styled.div`
 const Article = styled.div`
   color: ${({ theme }) => theme.color.gray80};
   line-height: 160%;
-  margin: 50px 0;
+  margin: 60px 0;
 `;
 const Line = styled.div`
   height: 1px;

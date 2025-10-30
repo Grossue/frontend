@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
 import styled, { css, keyframes } from "styled-components";
 import QuizToggle from "../components/reading/QuizToggle";
 import QuizPanel from "../components/reading/QuizPanel";
@@ -248,7 +249,13 @@ const IssueReading1ScriptPage = () => {
 
   return (
     <Container isQuizOpen={isQuizOpen}>
-      <ArticleBox isQuizOpen={isQuizOpen || isDictOpen}>
+      <ArticleBox
+        isQuizOpen={isQuizOpen || isDictOpen}
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Title style={FONT.xxl.bold}>{ai_result.title}</Title>
         <ArticleUrl
           style={FONT.xl.bold}
@@ -572,7 +579,7 @@ const Article = styled.div`
   margin: 30px 0;
 `;
 const ArticleWrapper = styled.div`
-  margin-top: 60px;
+  margin-top: 80px;
 `;
 
 const BubbleWrapper = styled.div`
@@ -813,7 +820,7 @@ const IssueItem = styled.div`
 
 const ExampleBox = styled.div`
   background-color: #f5f5f7;
-  padding: 12px 16px;
+  padding: 12px 20px;
   border-radius: 12px;
   text-align: left;
   color: #333;
@@ -829,14 +836,17 @@ const ExampleBox = styled.div`
     position: absolute;
     right: 10px;
   }
-  ul {
+  ul,
+  ol {
     padding-left: 20px;
+    margin: 6px 0;
   }
   li {
     margin-bottom: 12px;
+    line-height: 1.5;
   }
 
-  max-height: 150px; /* 원하는 높이 */
+  max-height: 150px;
   overflow-y: auto;
 
   &::-webkit-scrollbar {

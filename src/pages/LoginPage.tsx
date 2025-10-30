@@ -35,6 +35,7 @@ const LoginPage = () => {
             placeholder="이메일"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
           />
 
           <PasswordWrapper>
@@ -43,6 +44,7 @@ const LoginPage = () => {
               placeholder="비밀번호"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin(e)}
             />
             {password && (
               <ClearButton onClick={() => setPassword("")}>✕</ClearButton>
@@ -58,23 +60,6 @@ const LoginPage = () => {
 
           <LoginButton type="submit">로그인</LoginButton>
         </Form>
-
-        <Divider>OR</Divider>
-
-        <SocialButton kakao>
-          <KakaoIcon>
-            <Kakao />
-          </KakaoIcon>
-          카카오 로그인
-        </SocialButton>
-
-        <SocialButton google>
-          <GoogleIcon>
-            <Google />
-          </GoogleIcon>
-          Google 계정으로 로그인
-        </SocialButton>
-
         <JoinLink onClick={() => navigate("/signup1")}>
           이메일로 회원가입
         </JoinLink>
