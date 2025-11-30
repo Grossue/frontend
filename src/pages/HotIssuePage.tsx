@@ -112,7 +112,8 @@ const HotIssuePage: React.FC = () => {
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <DateText>
-        {new Date().getMonth() + 1}월 {new Date().getDate()}일{" "}
+        {/*{new Date().getMonth() + 1}월 {new Date().getDate()}일{" "}*/}
+        11월 29일
       </DateText>
       <Title>오늘의 핫한 이슈는?</Title>
       <SearchWrapper>
