@@ -7,7 +7,7 @@ export const postRegister = async (data: {
   gender: "MALE" | "FEMALE";
   birthYear: string;
   level: "LEVEL1" | "LEVEL2";
-  schoolId: string;
+  schoolName: string;
 }) => {
   try {
     const res = await request.post({

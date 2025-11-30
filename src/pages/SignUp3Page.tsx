@@ -96,11 +96,7 @@ const SignUp3Page = () => {
 
   // 모든 입력값 체크
   const isNextEnabled =
-    nickname &&
-    gender &&
-    birthYear !== "선택" &&
-    schoolLevel &&
-    selectedSchool !== null;
+    nickname && gender && birthYear !== "선택" && schoolSearch;
 
   // 다음 버튼 클릭
   const handleNext = () => {
@@ -113,7 +109,7 @@ const SignUp3Page = () => {
         gender,
         birthYear,
         schoolId: selectedSchool!.id,
-        schoolName: selectedSchool!.name,
+        schoolName: schoolSearch,
       },
     });
   };
