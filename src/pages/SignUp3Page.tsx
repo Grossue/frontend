@@ -108,7 +108,8 @@ const SignUp3Page = () => {
         nickname,
         gender,
         birthYear,
-        schoolId: selectedSchool!.id,
+        //schoolId: selectedSchool!.id,
+        schoolId: schoolSearch,
         schoolName: schoolSearch,
       },
     });
@@ -201,7 +202,7 @@ const SignUp3Page = () => {
           </Select>
           <SearchButton onClick={handleSearchSchools}>조회</SearchButton>
         </SchoolRow>
-        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
+        {/*schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>*/}
 
         <Label>학교 검색</Label>
         <SchoolSearchRow>
@@ -238,7 +239,7 @@ const SignUp3Page = () => {
             ))}
           </Select>
         </SchoolSearchRow>
-        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
+        {/*schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>*/}
       </Form>
 
       <NextButton disabled={!isNextEnabled} onClick={handleNext}>
