@@ -54,7 +54,7 @@ export const getArticleFeedback = async (
 export const getArticleRecommend2 = async () => {
   try {
     const res = await request.get({
-      url: `/v1/article/recommend-type2`,
+      url: `/v1/article/recommendation/recommend-history`,
       params: {},
     });
     console.log("메인 추천기사 조회 성공", res);
@@ -67,7 +67,7 @@ export const getArticleRecommend2 = async () => {
 export const getArticleRecommend1 = async (previousTopic: string) => {
   try {
     const res = await request.get({
-      url: `/v1/article/recommend-type1?previousTopic=${previousTopic}`,
+      url: `/v1/article/recommendation/recommend-previous-topic?previousTopic=${previousTopic}`,
       params: {},
     });
     console.log("뒤로가기 추천기사 조회 성공", res);
@@ -93,7 +93,7 @@ export const getArticleQna = async (sessionId: string, question: string) => {
 export const getArticleIssues = async (category: string) => {
   try {
     const res = await request.get({
-      url: `/v1/article/issues?category=${category}&date=2025-10-28`,
+      url: `/v1/article/issues?category=${category}&date=2025-10-30`,
       params: {},
     });
     console.log("카테고리별 이슈 목록 성공", res);

@@ -97,7 +97,7 @@ const IssueLoadingPage: React.FC = () => {
         console.log("기사 생성:", response.data);
         setData(response.data);
 
-        navigate(url, { state: { content: response.data } });
+        navigate(url, { state: { content: response.data, keyword: keyword } });
       } catch (error) {
         console.error("기사 생성 오류", error);
       }

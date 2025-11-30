@@ -70,8 +70,10 @@ interface Image {
 
 const IssueReading1GeneralPage = () => {
   const location = useLocation();
-  const locationState = location.state as { content?: Data };
+  const locationState = location.state as { content?: Data; keyword?: string };
   const [data, setData] = useState<Data | null>(locationState?.content || null);
+  const [keyword] = useState<string | undefined>(locationState?.keyword);
+
   //const data = (location.state as { content: Data })?.content;
   //const ai_result = data.ai_result;
   //const sessionId = data.session_id;
@@ -137,7 +139,7 @@ const IssueReading1GeneralPage = () => {
 
   // 뒤로가기 추천기사 API 연동
   useEffect(() => {
-    if (!data?.ai_result?.title) return;
+    if (!data?.ai_result?.title || !keyword) return;
 
     const fetchRecommendedArticles = async () => {
       if (!ai_result?.title) return;
@@ -146,7 +148,7 @@ const IssueReading1GeneralPage = () => {
       setRecError(null);
 
       try {
-        const res = await getArticleRecommend1(ai_result.title); // API 호출
+        const res = await getArticleRecommend1(keyword); // API 호출
         if (res && res.data) {
           setRecommendedArticles(res.data); // 배열만 넣기
         } else {

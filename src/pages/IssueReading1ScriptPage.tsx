@@ -74,8 +74,9 @@ interface Image {
 
 const IssueReading1ScriptPage = () => {
   const location = useLocation();
-  const locationState = location.state as { content?: Data };
+  const locationState = location.state as { content?: Data; keyword?: string };
   const [data, setData] = useState<Data | null>(locationState?.content || null);
+  const [keyword] = useState<string | undefined>(locationState?.keyword);
 
   // 우측 슬라이드 탭
   const [isQuizOpen, setIsQuizOpen] = useState(false);
@@ -139,7 +140,7 @@ const IssueReading1ScriptPage = () => {
 
   // 뒤로가기 추천기사 API 연동
   useEffect(() => {
-    if (!data?.ai_result?.title) return;
+    if (!data?.ai_result?.title || !keyword) return;
 
     const fetchRecommendedArticles = async () => {
       if (!ai_result?.title) return;
