@@ -96,7 +96,11 @@ const SignUp3Page = () => {
 
   // 모든 입력값 체크
   const isNextEnabled =
-    nickname && gender && birthYear !== "선택" && schoolSearch;
+    nickname &&
+    gender &&
+    birthYear !== "선택" &&
+    schoolLevel &&
+    selectedSchool !== null;
 
   // 다음 버튼 클릭
   const handleNext = () => {
@@ -108,9 +112,8 @@ const SignUp3Page = () => {
         nickname,
         gender,
         birthYear,
-        //schoolId: selectedSchool!.id,
-        schoolId: schoolSearch,
-        schoolName: schoolSearch,
+        schoolId: selectedSchool!.id,
+        schoolName: selectedSchool!.name,
       },
     });
   };
@@ -202,7 +205,7 @@ const SignUp3Page = () => {
           </Select>
           <SearchButton onClick={handleSearchSchools}>조회</SearchButton>
         </SchoolRow>
-        {/*schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>*/}
+        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
 
         <Label>학교 검색</Label>
         <SchoolSearchRow>
@@ -239,7 +242,7 @@ const SignUp3Page = () => {
             ))}
           </Select>
         </SchoolSearchRow>
-        {/*schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>*/}
+        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
       </Form>
 
       <NextButton disabled={!isNextEnabled} onClick={handleNext}>
