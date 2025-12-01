@@ -34,22 +34,6 @@ const HotIssuePage: React.FC = () => {
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const day = days[today.getDay()];
 
-  useEffect(() => {
-    const checkAiRecommend = async () => {
-      try {
-        const res = await getArticleRecommend2();
-        if (res.data && res.data.length > 0) {
-          setHasAiRecommend(true);
-        } else {
-          setHasAiRecommend(false);
-        }
-      } catch {
-        setHasAiRecommend(false);
-      }
-    };
-    checkAiRecommend();
-  }, []);
-
   // 카테고리별 이슈 조회 API
   useEffect(() => {
     const fetchIssues = async () => {
@@ -88,6 +72,23 @@ const HotIssuePage: React.FC = () => {
 
     fetchIssues();
   }, [selectedTag]);
+
+  // AI 추천 빈배열인지 확인
+  useEffect(() => {
+    const checkAiRecommend = async () => {
+      try {
+        const res = await getArticleRecommend2();
+        if (res.data && res.data.length > 0) {
+          setHasAiRecommend(true);
+        } else {
+          setHasAiRecommend(false);
+        }
+      } catch {
+        setHasAiRecommend(false);
+      }
+    };
+    checkAiRecommend();
+  }, []);
 
   const handleSearch = () => {
     navigate("/loading", { state: { keyword } });
