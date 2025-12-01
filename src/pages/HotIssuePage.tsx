@@ -20,14 +20,12 @@ const HotIssuePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [hasAiRecommend, setHasAiRecommend] = useState(false);
-
   const aiCache = React.useRef<string[] | null>(null);
-
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem("accessToken");
 
   const baseTags = ["정치", "IT/과학", "경제", "사회", "생활/문화", "세계"];
-  const tags = hasAiRecommend ? [...baseTags, "💡AI 추천"] : baseTags;
+  const tags = isLoggedIn ? [...baseTags, "💡AI 추천"] : baseTags;
 
   // 오늘 날짜
   const today = new Date();
@@ -72,23 +70,6 @@ const HotIssuePage: React.FC = () => {
 
     fetchIssues();
   }, [selectedTag]);
-
-  // AI 추천 빈배열인지 확인
-  useEffect(() => {
-    const checkAiRecommend = async () => {
-      try {
-        const res = await getArticleRecommend2();
-        if (res.data && res.data.length > 0) {
-          setHasAiRecommend(true);
-        } else {
-          setHasAiRecommend(false);
-        }
-      } catch {
-        setHasAiRecommend(false);
-      }
-    };
-    checkAiRecommend();
-  }, []);
 
   const handleSearch = () => {
     navigate("/loading", { state: { keyword } });
