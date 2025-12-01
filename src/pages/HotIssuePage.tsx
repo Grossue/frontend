@@ -20,25 +20,35 @@ const HotIssuePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasAiRecommend, setHasAiRecommend] = useState(false);
 
   const aiCache = React.useRef<string[] | null>(null);
 
   const navigate = useNavigate();
 
-  const tags = [
-    "정치",
-    "IT/과학",
-    "경제",
-    "사회",
-    "생활/문화",
-    "세계",
-    "💡AI 추천",
-  ];
+  const baseTags = ["정치", "IT/과학", "경제", "사회", "생활/문화", "세계"];
+  const tags = hasAiRecommend ? [...baseTags, "💡AI 추천"] : baseTags;
 
   // 오늘 날짜
   const today = new Date();
   const days = ["일", "월", "화", "수", "목", "금", "토"];
   const day = days[today.getDay()];
+
+  useEffect(() => {
+    const checkAiRecommend = async () => {
+      try {
+        const res = await getArticleRecommend2();
+        if (res.data && res.data.length > 0) {
+          setHasAiRecommend(true);
+        } else {
+          setHasAiRecommend(false);
+        }
+      } catch {
+        setHasAiRecommend(false);
+      }
+    };
+    checkAiRecommend();
+  }, []);
 
   // 카테고리별 이슈 조회 API
   useEffect(() => {
