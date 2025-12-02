@@ -144,125 +144,163 @@ const SignUp3Page = () => {
       >
         아래 내용을 입력해 주세요.
       </Subtitle>
-
       <Form
         as={motion.div}
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
       >
-        <Label>닉네임</Label>
-        <NicknameRow>
-          <Input
-            placeholder="8자 이하, 특수문자 제외"
-            value={nickname}
-            onChange={(e) => {
-              setNickname(e.target.value);
-              setNicknameMessage(null); // 입력 바뀌면 메시지 초기화
-              setNicknameStatus(null);
-            }}
-          />
-          <CheckButton type="button" onClick={handleCheckNickname}>
-            확인
-          </CheckButton>
-        </NicknameRow>
-        {nickname && /[^a-zA-Z0-9가-힣]/.test(nickname) && (
-          <ErrorText>특수문자는 포함할 수 없어요.</ErrorText>
-        )}
-        {nicknameMessage && (
-          <NicknameMessage status={nicknameStatus}>
-            {nicknameMessage}
-          </NicknameMessage>
-        )}
-
-        <Label>성별</Label>
-        <GenderRow>
-          <GenderButton
-            onClick={() => setGender("MALE")}
-            selected={gender === "MALE"}
-          >
-            남성
-          </GenderButton>
-          <GenderButton
-            onClick={() => setGender("FEMALE")}
-            selected={gender === "FEMALE"}
-          >
-            여성
-          </GenderButton>
-        </GenderRow>
-
-        <Label>생년</Label>
-        <Select
-          value={birthYear}
-          onChange={(e) => setBirthYear(e.target.value)}
+        {/* 닉네임 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
         >
-          <option>선택</option>
-          {Array.from({ length: 50 }, (_, i) => {
-            const year = 2025 - i;
-            return (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            );
-          })}
-        </Select>
+          <Label>닉네임</Label>
+          <NicknameRow>
+            <Input
+              placeholder="8자 이하, 특수문자 제외"
+              value={nickname}
+              onChange={(e) => {
+                setNickname(e.target.value);
+                setNicknameMessage(null);
+                setNicknameStatus(null);
+              }}
+            />
+            <CheckButton type="button" onClick={handleCheckNickname}>
+              확인
+            </CheckButton>
+          </NicknameRow>
+          {nickname && /[^a-zA-Z0-9가-힣]/.test(nickname) && (
+            <ErrorText>특수문자는 포함할 수 없어요.</ErrorText>
+          )}
+          {nicknameMessage && (
+            <NicknameMessage status={nicknameStatus}>
+              {nicknameMessage}
+            </NicknameMessage>
+          )}
+        </motion.div>
 
-        <Label>학교급</Label>
-        <SchoolRow>
-          <Select
-            value={schoolLevel}
-            onChange={(e) => {
-              setSchoolLevel(e.target.value);
-              setSchoolList([]);
-              setSelectedSchool(null);
-              setSchoolLevelError(false);
-            }}
-          >
-            <option value="">선택하세요</option>
-            <option value="ELEMENTARY">초등학교</option>
-            <option value="MIDDLE">중학교</option>
-            <option value="HIGH">고등학교</option>
-          </Select>
-          <SearchButton onClick={handleSearchSchools}>조회</SearchButton>
-        </SchoolRow>
-        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
+        {/* 성별 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6, ease: "easeOut" }}
+        >
+          <Label>성별</Label>
+          <GenderRow>
+            <GenderButton
+              onClick={() => setGender("MALE")}
+              selected={gender === "MALE"}
+            >
+              남성
+            </GenderButton>
+            <GenderButton
+              onClick={() => setGender("FEMALE")}
+              selected={gender === "FEMALE"}
+            >
+              여성
+            </GenderButton>
+          </GenderRow>
+        </motion.div>
 
-        <Label>학교 검색</Label>
-        <SchoolSearchRow>
-          <Input
-            placeholder="학교명을 입력하세요"
-            value={schoolSearch}
-            onChange={(e) => {
-              if (!schoolLevel) {
-                setSchoolLevelError(true); // 학교급 선택 안됨
-                return;
-              }
-              setSchoolLevelError(false); // 선택됨
-              setSchoolSearch(e.target.value);
-            }}
-          />
+        {/* 생년 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+        >
+          <Label>생년</Label>
           <Select
-            value={selectedSchool?.id || ""}
-            onChange={(e) => {
-              if (!schoolLevel) {
-                setSchoolLevelError(true);
-                return;
-              }
-              setSchoolLevelError(false);
-              const school =
-                schoolList.find((s) => s.id === e.target.value) || null;
-              setSelectedSchool(school);
-            }}
+            value={birthYear}
+            onChange={(e) => setBirthYear(e.target.value)}
           >
-            <option value="">학교 선택</option>
-            {filteredSchools.map((school) => (
-              <option key={school.id} value={school.id}>
-                {school.name}
-              </option>
-            ))}
+            <option>선택</option>
+            {Array.from({ length: 50 }, (_, i) => {
+              const year = 2025 - i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
           </Select>
-        </SchoolSearchRow>
-        {schoolLevelError && <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>}
+        </motion.div>
+
+        {/* 학교급 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.6, ease: "easeOut" }}
+        >
+          <Label>학교급</Label>
+          <SchoolRow>
+            <Select
+              value={schoolLevel}
+              onChange={(e) => {
+                setSchoolLevel(e.target.value);
+                setSchoolList([]);
+                setSelectedSchool(null);
+                setSchoolLevelError(false);
+              }}
+            >
+              <option value="">선택하세요</option>
+              <option value="ELEMENTARY">초등학교</option>
+              <option value="MIDDLE">중학교</option>
+              <option value="HIGH">고등학교</option>
+            </Select>
+            <SearchButton onClick={handleSearchSchools}>조회</SearchButton>
+          </SchoolRow>
+          {schoolLevelError && (
+            <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>
+          )}
+        </motion.div>
+
+        {/* 학교 검색 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
+        >
+          <Label>학교 검색</Label>
+          <SchoolSearchRow>
+            <Input
+              placeholder="학교명을 입력하세요"
+              value={schoolSearch}
+              onChange={(e) => {
+                if (!schoolLevel) {
+                  setSchoolLevelError(true);
+                  return;
+                }
+                setSchoolLevelError(false);
+                setSchoolSearch(e.target.value);
+              }}
+            />
+            <Select
+              value={selectedSchool?.id || ""}
+              onChange={(e) => {
+                if (!schoolLevel) {
+                  setSchoolLevelError(true);
+                  return;
+                }
+                setSchoolLevelError(false);
+                const school =
+                  schoolList.find((s) => s.id === e.target.value) || null;
+                setSelectedSchool(school);
+              }}
+            >
+              <option value="">학교 선택</option>
+              {filteredSchools.map((school) => (
+                <option key={school.id} value={school.id}>
+                  {school.name}
+                </option>
+              ))}
+            </Select>
+          </SchoolSearchRow>
+          {schoolLevelError && (
+            <ErrorText>학교급을 먼저 선택해주세요.</ErrorText>
+          )}
+        </motion.div>
       </Form>
 
       <NextButton disabled={!isNextEnabled} onClick={handleNext}>
