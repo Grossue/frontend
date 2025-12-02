@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { getUserCheckEmail } from "../api/User"; // 경로 맞춰주세요
+import { motion } from "framer-motion";
 
 const SignUp1Page = () => {
   const [email, setEmail] = useState("");
@@ -51,12 +52,29 @@ const SignUp1Page = () => {
         <Step onClick={() => navigate("/signup3")}>3</Step>
         <Step onClick={() => navigate("/signup4")}>4</Step>
       </StepIndicator>
-
-      <Title>반가워요!</Title>
-      <Subtitle>본인 확인을 위해 이메일 인증을 진행해 주세요.</Subtitle>
-
+      <Title
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        반가워요!
+      </Title>
+      <Subtitle
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        본인 확인을 위해 이메일 인증을 진행해 주세요.
+      </Subtitle>
       {/* 이메일 입력 */}
-      <InputRow>
+      <InputRow
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+      >
         <Input
           placeholder="example@email.com"
           value={email}

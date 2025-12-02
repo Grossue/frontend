@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUserCheckNickname } from "../api/User";
 import { getSchools } from "../api/School";
+import { motion } from "framer-motion";
 
 const SignUp3Page = () => {
   const navigate = useNavigate();
@@ -127,10 +128,29 @@ const SignUp3Page = () => {
         <Step onClick={() => navigate("/signup4")}>4</Step>
       </StepIndicator>
 
-      <Title>프로필 설정</Title>
-      <Subtitle>아래 내용을 입력해 주세요.</Subtitle>
+      <Title
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        프로필 설정
+      </Title>
+      <Subtitle
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        아래 내용을 입력해 주세요.
+      </Subtitle>
 
-      <Form>
+      <Form
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+      >
         <Label>닉네임</Label>
         <NicknameRow>
           <Input

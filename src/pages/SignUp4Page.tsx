@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
 import { postRegister } from "../api/User";
+import { motion } from "framer-motion";
 
 const SignUp4Page = () => {
   const [selected, setSelected] = useState<"LEVEL1" | "LEVEL2" | null>(null);
@@ -53,13 +54,31 @@ const SignUp4Page = () => {
         <Step active>4</Step>
       </StepIndicator>
 
-      <Title>마지막이에요!</Title>
-      <Subtitle>아래 예문을 보고, 레벨을 선택해 주세요</Subtitle>
+      <Title
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        마지막이에요!
+      </Title>
+      <Subtitle
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        아래 예문을 보고, 레벨을 선택해 주세요
+      </Subtitle>
 
       <CardContainer>
         <Card
           selected={selected === "LEVEL1"}
           onClick={() => setSelected("LEVEL1")}
+          as={motion.div}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
         >
           <Icon>🌱</Icon>
           <CardText>
@@ -73,6 +92,10 @@ const SignUp4Page = () => {
         <Card
           selected={selected === "LEVEL2"}
           onClick={() => setSelected("LEVEL2")}
+          as={motion.div}
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
         >
           <Icon>🌷</Icon>
           <CardText>

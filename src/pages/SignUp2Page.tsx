@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const SignUp2Page = () => {
   const location = useLocation();
@@ -28,34 +29,66 @@ const SignUp2Page = () => {
         <Step onClick={() => navigate("/signup4")}>4</Step>
       </StepIndicator>
 
-      <Title>기본 정보 입력</Title>
-      <Subtitle>아래 내용을 입력해 주세요.</Subtitle>
+      <Title
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        기본 정보 입력
+      </Title>
+      <Subtitle
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
+      >
+        아래 내용을 입력해 주세요.
+      </Subtitle>
 
-      <Label>이메일</Label>
-      <ReadOnlyInput value={email} readOnly />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+      >
+        <Label>이메일</Label>
+        <ReadOnlyInput value={email} readOnly />
+      </motion.div>
 
-      <Label>비밀번호</Label>
-      <Input
-        type="password"
-        placeholder="영문, 숫자, 특수문자 조합 8~20자"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      {showPasswordError && (
-        <ErrorMessage>
-          비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자로 입력해주세요.
-        </ErrorMessage>
-      )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.6, ease: "easeOut" }}
+      >
+        <Label>비밀번호</Label>
+        <Input
+          type="password"
+          placeholder="영문, 숫자, 특수문자 조합 8~20자"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        {showPasswordError && (
+          <ErrorMessage>
+            비밀번호는 영문, 숫자, 특수문자를 포함한 8~20자로 입력해주세요.
+          </ErrorMessage>
+        )}
+      </motion.div>
 
-      <Input
-        type="password"
-        placeholder="비밀번호 재입력"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-      />
-      {showMismatchError && (
-        <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
-      )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+      >
+        <Input
+          type="password"
+          placeholder="비밀번호 재입력"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        {showMismatchError && (
+          <ErrorMessage>비밀번호가 일치하지 않습니다.</ErrorMessage>
+        )}
+      </motion.div>
 
       <NextButton
         disabled={!isNextEnabled}

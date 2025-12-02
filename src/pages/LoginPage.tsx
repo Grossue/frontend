@@ -5,6 +5,7 @@ import { postLogin } from "../api/User";
 import { ReactComponent as LoginLogo } from "../assets/Logo.svg";
 import { ReactComponent as Kakao } from "../assets/Kakao.svg";
 import { ReactComponent as Google } from "../assets/Google.svg";
+import { motion } from "framer-motion";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -39,7 +40,12 @@ const LoginPage = () => {
 
   return (
     <Container>
-      <LoginBox>
+      <LoginBox
+        as={motion.div}
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Logo>
           <LoginLogo />
         </Logo>
