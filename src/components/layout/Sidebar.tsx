@@ -69,15 +69,24 @@ const Sidebar: React.FC = () => {
         <Home />
         <span style={FONT.md.medium}>홈</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/vocabulary")}>
+      <MenuItem
+        isOpen={isOpen}
+        onClick={() => (isLogIn ? navigate("/vocabulary") : navigate("/login"))}
+      >
         <Dic />
         <span style={FONT.md.medium}>단어장</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/ranking")}>
+      <MenuItem
+        isOpen={isOpen}
+        onClick={() => (isLogIn ? navigate("/ranking") : navigate("/login"))}
+      >
         <Memory />
         <span style={FONT.md.medium}>우리 학교 랭킹</span>
       </MenuItem>
-      <MenuItem isOpen={isOpen} onClick={() => navigate("/mypage")}>
+      <MenuItem
+        isOpen={isOpen}
+        onClick={() => (isLogIn ? navigate("/mypage") : navigate("/login"))}
+      >
         <MyPage />
         <span style={FONT.md.medium}>마이페이지</span>
       </MenuItem>
@@ -89,7 +98,7 @@ const Sidebar: React.FC = () => {
         <span style={FONT.md.medium}>{isLogIn ? "로그아웃" : "로그인"}</span>
       </MenuItem>
 
-      <Footer isOpen={isOpen}>
+      <Footer isOpen={isOpen} onClick={() => navigate("/")}>
         <Logo />
       </Footer>
     </Container>
@@ -205,6 +214,7 @@ const Footer = styled.div<{ isOpen: boolean }>`
   font-size: 12px;
   text-align: center;
   padding: 12px 0;
+  cursor: pointer;
 
   ${({ isOpen }) =>
     !isOpen &&
