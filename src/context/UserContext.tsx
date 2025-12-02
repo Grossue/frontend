@@ -1,12 +1,10 @@
-// context/UserContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getUser } from "../api/User";
 
-// 유저 정보 확장 (MyPage에서 사용하는 필드 포함)
 export interface UserInfo {
   nickname: string;
   email: string;
-  level: string; // LEVEL1 | LEVEL2 | LEVEL3
+  level: string;
   reward: number;
   readCnt: number;
   consecutiveAttendanceDays: number;
@@ -14,8 +12,9 @@ export interface UserInfo {
 
 interface UserContextType {
   user: UserInfo | null;
-  setUser: React.Dispatch<React.SetStateAction<UserInfo | null>>; // 직접 업데이트 가능
-  refreshUser: () => void; // 상태 갱신 함수
+  setUser: React.Dispatch<React.SetStateAction<UserInfo | null>>;
+  refreshUser: () => void;
+  logout: () => void;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -47,8 +46,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchUser();
   }, []);
 
+  const logout = () => {
+    setUser(null);
+  };
+
   return (
-    <UserContext.Provider value={{ user, setUser, refreshUser: fetchUser }}>
+    <UserContext.Provider
+      value={{ user, setUser, refreshUser: fetchUser, logout }}
+    >
       {children}
     </UserContext.Provider>
   );

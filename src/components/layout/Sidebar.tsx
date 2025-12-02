@@ -16,13 +16,13 @@ const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
 
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, logout } = useUser();
   const isLogIn = !!localStorage.getItem("accessToken");
 
   const handleAuthClick = () => {
     if (isLogIn) {
       localStorage.removeItem("accessToken");
-      refreshUser(); // 로그아웃 후 Context 갱신
+      logout();
       navigate("/login");
     } else {
       navigate("/login");
