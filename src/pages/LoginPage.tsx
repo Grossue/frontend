@@ -83,7 +83,7 @@ const LoginPage = () => {
         <JoinLink onClick={() => navigate("/signup1")}>
           이메일로 회원가입
         </JoinLink>
-        <JoinLink onClick={handleGuestLogin}>게스트로 로그인</JoinLink>
+        <JoinLink onClick={handleGuestLogin}>테스트 계정으로 로그인</JoinLink>
       </LoginBox>
     </Container>
   );
