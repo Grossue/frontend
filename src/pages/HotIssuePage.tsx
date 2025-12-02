@@ -7,6 +7,7 @@ import { ReactComponent as GreenSearch } from "../assets/GreenSearch.svg";
 import { ReactComponent as Previous } from "../assets/Previous.svg";
 import { ReactComponent as Next } from "../assets/Next.svg";
 import { getArticleIssues, getArticleRecommend2 } from "../api/Reading";
+import { keyframes } from "styled-components";
 
 interface TagButtonProps {
   active: boolean;
@@ -132,7 +133,13 @@ const HotIssuePage: React.FC = () => {
         ))}
       </TagList>
 
-      {loading && <p>이슈 불러오는 중...</p>}
+      {loading && (
+        <LoadingWrapper>
+          <Dot />
+          <Dot />
+          <Dot />
+        </LoadingWrapper>
+      )}
       {error && <p>{error}</p>}
 
       <IssueList>
@@ -325,5 +332,39 @@ const PageButton = styled.button<{ disabled?: boolean }>`
   &:disabled {
     color: ${({ theme }) => theme.color.gray20};
     cursor: not-allowed;
+  }
+`;
+const dotBounce = keyframes`
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+`;
+const LoadingWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+`;
+
+const Dot = styled.span`
+  width: 8px;
+  height: 8px;
+  background-color: #16a34a;
+  border-radius: 50%;
+  display: inline-block;
+  animation: ${dotBounce} 1.4s infinite ease-in-out both;
+
+  &:nth-child(1) {
+    animation-delay: 0s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.4s;
   }
 `;
