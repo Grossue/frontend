@@ -23,6 +23,20 @@ const LoginPage = () => {
     }
   };
 
+  // 게스트 로그인
+  const handleGuestLogin = async () => {
+    try {
+      const response = await postLogin({
+        email: "test@naver.com",
+        password: "test1234!",
+      });
+      localStorage.setItem("accessToken", response.data.accessToken);
+      window.location.href = "/";
+    } catch (err) {
+      setError(true);
+    }
+  };
+
   return (
     <Container>
       <LoginBox>
@@ -63,6 +77,7 @@ const LoginPage = () => {
         <JoinLink onClick={() => navigate("/signup1")}>
           이메일로 회원가입
         </JoinLink>
+        <JoinLink onClick={handleGuestLogin}>게스트로 로그인</JoinLink>
       </LoginBox>
     </Container>
   );
@@ -146,7 +161,6 @@ export const ErrorMessage = styled.div`
   color: #f04444;
   font-size: 13px;
   margin-top: 8px;
-  margin-bottom: 16px;
 `;
 
 export const LoginButton = styled.button`
@@ -222,9 +236,15 @@ export const GoogleIcon = styled.span`
   margin-right: 8px;
 `;
 
-export const JoinLink = styled.a`
+export const JoinLink = styled.div`
   font-size: 14px;
   color: #777;
   margin-top: 16px;
   cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #178f3b;
+    transform: scale(1.01);
+  }
 `;
