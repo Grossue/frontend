@@ -73,15 +73,29 @@ const HotIssuePage: React.FC = () => {
   }, [selectedTag]);
 
   const handleSearch = () => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
     navigate("/loading", { state: { keyword } });
   };
 
   const handleIssueClick = (issue: string) => {
+    if (!isLoggedIn) {
+      navigate("/login");
+      return;
+    }
     navigate("/loading", { state: { keyword: issue } });
   };
 
   const handleEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSearch();
+    if (e.key === "Enter") {
+      if (!isLoggedIn) {
+        navigate("/login");
+        return;
+      }
+      handleSearch();
+    }
   };
 
   const itemsPerPage = 6;
